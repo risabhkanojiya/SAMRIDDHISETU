@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Globe, Search, FolderOpen, MapPin, Calculator, LogIn } from 'lucide-react';
 import { useTranslation } from '@/lib/I18nProvider';
@@ -35,18 +36,22 @@ export default function Navbar() {
     <nav
       className={`fixed top-4 left-4 right-4 max-w-[1400px] mx-auto z-50 transition-all duration-300 rounded-full ${
         scrolled
-          ? 'bg-white/90 backdrop-blur-xl border border-[#e5e7eb] shadow-sm'
-          : 'bg-white/60 backdrop-blur-md border border-[#e5e7eb] shadow-sm'
+          ? 'bg-white/40 backdrop-blur-2xl border border-white/60 shadow-lg shadow-black/5'
+          : 'bg-white/20 backdrop-blur-xl border border-white/40 shadow-sm shadow-black/5'
       }`}
     >
       <div className="px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-full border border-[#d1d1d1] flex items-center justify-center text-[#272727] font-bold text-xs bg-white shadow-sm transition-shadow">
-              SS
-            </div>
-            <span className="text-lg font-medium text-[#272727] hidden sm:block tracking-tight">
+          <Link href="/" className="flex items-center gap-1 group">
+            <Image 
+              src="/logo.png" 
+              alt="SamriddhiSetu Logo" 
+              width={32} 
+              height={32} 
+              className="w-8 h-8 object-contain" 
+            />
+            <span className="text-lg font-semibold text-[#272727] hidden sm:block tracking-tight">
               SamriddhiSetu
             </span>
           </Link>
@@ -63,7 +68,7 @@ export default function Navbar() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium transition-all duration-300 ${
                     isActive
                       ? 'bg-[#013e4e]/10 text-[#013e4e]'
-                      : 'text-[#5a5a5a] hover:text-[#272727] hover:bg-black/5'
+                      : 'text-[#272727] hover:bg-black/5'
                   }`}
                 >
                   {t(link.i18nKey)}
@@ -77,7 +82,7 @@ export default function Navbar() {
             {/* Language Toggle */}
             <button
               onClick={() => setLocale(locale === 'en' ? 'hi' : 'en')}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium text-[#5a5a5a] hover:text-[#272727] hover:bg-black/5 transition-all border border-transparent hover:border-[#e5e7eb]"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium text-[#272727] hover:bg-black/5 transition-all border border-transparent hover:border-[#e5e7eb]"
               title="Switch Language"
             >
               <Globe size={14} />
@@ -95,7 +100,7 @@ export default function Navbar() {
             {/* Mobile Hamburger */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 rounded-full text-[#5a5a5a] hover:text-[#272727] hover:bg-black/5 transition-all"
+              className="md:hidden p-2 rounded-full text-[#272727] hover:bg-black/5 transition-all"
             >
               {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -120,7 +125,7 @@ export default function Navbar() {
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
                     ? 'bg-[#013e4e]/10 text-[#013e4e]'
-                    : 'text-[#5a5a5a] hover:text-[#272727] hover:bg-black/5'
+                    : 'text-[#272727] hover:bg-black/5'
                 }`}
               >
                 <Icon size={16} />

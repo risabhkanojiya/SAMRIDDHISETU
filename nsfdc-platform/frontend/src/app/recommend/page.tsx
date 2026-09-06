@@ -1,11 +1,14 @@
 'use client';
 
+import { ShaderBackground } from "@/components/ui/neuro-noise";
+
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Sparkles, GraduationCap, Briefcase, Tractor, Store, Home, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, GraduationCap, Briefcase, Tractor, Store, Home, CheckCircle, Upload } from 'lucide-react';
 import GlassCard from '@/components/GlassCard';
 import StepProgress from '@/components/StepProgress';
 import { useAppStore } from '@/store/useAppStore';
 import Link from 'next/link';
+import MotionButton from '@/components/ui/motion-button';
 
 const PROJECT_TYPES = [
   { value: 'micro_enterprise', label: 'Micro Enterprise', desc: 'Small business up to ₹1.40 Lakh', icon: Store },
@@ -109,19 +112,23 @@ export default function RecommendPage() {
   const formatINR = (val: number) => '₹' + val.toLocaleString('en-IN');
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 bg-hummingbird-gradient">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#e5e7eb] shadow-sm text-xs font-semibold text-[#013e4e] mb-4">
-            <Sparkles size={14} />
-            AI-Powered Matching
+    <div className="relative min-h-screen bg-hummingbird-gradient overflow-hidden">
+      <div className="absolute inset-0 z-0 opacity-100 mix-blend-multiply pointer-events-none">
+        <ShaderBackground className="w-full h-full" />
+      </div>
+      <div className="relative z-10 pt-24 pb-16 px-4">
+        <div className="max-w-3xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#e5e7eb] shadow-sm text-xs font-semibold text-[#013e4e] mb-4">
+              <Sparkles size={14} />
+              AI-Powered Matching
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#272727]">
+              Find Your <span className="text-[#013e4e]">Perfect Scheme</span>
+            </h1>
+            <p className="text-[#5a5a5a] text-lg">Answer 3 quick questions and we'll match you.</p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#272727]">
-            Find Your <span className="text-[#013e4e]">Perfect Scheme</span>
-          </h1>
-          <p className="text-[#5a5a5a] text-lg">Answer 3 quick questions and we'll match you.</p>
-        </div>
 
         {/* Step Progress */}
         <div className="mb-10">
@@ -276,7 +283,7 @@ export default function RecommendPage() {
                 </div>
 
                 {/* Scheme name */}
-                <h2 className="text-3xl sm:text-4xl font-bold text-[#272727] mb-3">
+                <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-[#013e4e] to-[#1a6b80]">
                   {result.name}
                 </h2>
                 <p className="text-[#5a5a5a] text-base mb-8">
@@ -314,17 +321,13 @@ export default function RecommendPage() {
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Link href="/results" className="bg-[#013e4e] text-white hover:bg-[#1a6b80] transition-colors rounded-full px-6 py-3 font-semibold text-center flex items-center justify-center gap-2">
-                    Calculate EMI
-                    <ArrowRight size={18} />
+                <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+                  <MotionButton href="/results" label="Calculate EMI" classes="w-full sm:w-auto" />
+                  <Link href="/vault" className="bg-white text-[#013e4e] px-7 py-3.5 rounded-[30px] font-medium text-base border border-[#e5e7eb] transition-all duration-500 ease-out hover:bg-[#013e4e] hover:text-white hover:border-[#013e4e] flex justify-center items-center gap-2 shadow-sm hover:shadow-md w-full sm:w-auto">
+                    <Upload size={16} /> Upload Documents
                   </Link>
-                  <Link href="/vault" className="bg-white border border-[#013e4e]/20 text-[#013e4e] hover:bg-[#013e4e]/5 transition-colors rounded-full px-6 py-3 font-semibold text-center flex items-center justify-center gap-2">
-                    Upload Documents
-                  </Link>
-                  <Link href="/locator" className="bg-white border border-[#013e4e]/20 text-[#013e4e] hover:bg-[#013e4e]/5 transition-colors rounded-full px-6 py-3 font-semibold text-center flex items-center justify-center gap-2">
-                    <MapPin size={18} />
-                    Find Partner
+                  <Link href="/locator" className="bg-white text-[#013e4e] px-7 py-3.5 rounded-[30px] font-medium text-base border border-[#e5e7eb] transition-all duration-500 ease-out hover:bg-[#013e4e] hover:text-white hover:border-[#013e4e] flex justify-center items-center gap-2 shadow-sm hover:shadow-md w-full sm:w-auto">
+                    <MapPin size={16} /> Find Partner
                   </Link>
                 </div>
               </div>
@@ -364,6 +367,7 @@ export default function RecommendPage() {
             </button>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

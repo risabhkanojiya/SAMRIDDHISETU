@@ -7,6 +7,10 @@ import AnimatedCounter from '@/components/AnimatedCounter';
 import { CombinedScrollSequence } from '@/components/ScrollAnimations';
 import { AsciiObject } from '@/components/canvasui/AsciiObject';
 import MotionButton from '@/components/ui/motion-button';
+import { CoverflowCarousel } from '@/components/ui/coverflow-carousel';
+import GeometricBackground from '@/components/ui/geometric-background';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 
 
 const features = [
@@ -59,6 +63,16 @@ const stats = [
 ];
 
 export default function Home() {
+  const thirdSectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: thirdSectionRef,
+    offset: ["start start", "end end"]
+  });
+
+  const sectionScale = useTransform(scrollYProgress, [0, 0.7], [0.5, 1]);
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.15], [0, 1]);
+  const sectionY = useTransform(scrollYProgress, [0, 0.7], [50, 0]);
+
   return (
     <div className="relative">
       {/* ═══ HERO SECTION ═══ */}
@@ -153,11 +167,17 @@ export default function Home() {
       />
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section className="relative py-28 px-4 bg-white">
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <p className="text-sm font-semibold text-[#013e4e] uppercase tracking-widest mb-4">How it works</p>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-[#272727]">
+      <section ref={thirdSectionRef} className="relative h-[140vh] bg-white">
+        <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden w-full pt-24 pb-12">
+          {/* Dynamic Background Elements */}
+          <GeometricBackground>
+            <motion.div 
+              className="max-w-5xl mx-auto relative z-10 w-full"
+              style={{ scale: sectionScale, opacity: sectionOpacity, y: sectionY }}
+            >
+          <div className="text-center mb-6">
+            <p className="text-sm font-semibold text-[#013e4e] uppercase tracking-widest mb-2">How it works</p>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-[#272727]">
               Apply in{' '}
               <span className="text-[#013e4e]">4 simple steps</span>
             </h2>
@@ -166,23 +186,23 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {steps.map((step, i) => (
-              <div key={i} className="p-6 relative overflow-hidden group bg-[#f8f9fa] border border-[#e5e7eb] rounded-[16px] hover:bg-white hover:shadow-lg hover:border-[#013e4e]/20 transition-all duration-300 hover:-translate-y-1">
-                {/* Step number background */}
-                <div className="absolute -top-4 -right-2 text-7xl font-black text-[#013e4e]/[0.04] group-hover:text-[#013e4e]/[0.08] transition-colors duration-500">
-                  {step.num}
-                </div>
-                <div className="relative z-10">
-                  <div className="text-xs font-bold text-[#013e4e] mb-3 tracking-widest">
-                    STEP {step.num}
-                  </div>
-                  <h3 className="text-lg font-bold text-[#272727] mb-2">{step.title}</h3>
-                  <p className="text-sm text-[#5a5a5a] leading-relaxed">{step.desc}</p>
-                </div>
-              </div>
-            ))}
+          <div className="mt-8 mb-4">
+            <CoverflowCarousel 
+              cardWidth="clamp(200px, 30vw, 360px)"
+              slides={steps.map((step) => ({
+                src: `https://placehold.co/600x600/f4f4f1/013e4e?text=Step+${step.num}`,
+                alt: step.title,
+                title: step.title,
+                subtitle: step.desc,
+                meta: [{ label: 'Step', value: step.num }]
+              }))}
+              showCaption={true}
+              showNavigation={true}
+              showPagination={true}
+            />
           </div>
+            </motion.div>
+          </GeometricBackground>
         </div>
       </section>
 

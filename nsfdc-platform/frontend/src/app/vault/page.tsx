@@ -1,8 +1,11 @@
 'use client';
 
+import { ShaderBackground } from "@/components/ui/neuro-noise";
+
 import { useState } from 'react';
 import GlassCard from '@/components/GlassCard';
 import { Upload, FileText, CheckCircle, XCircle, Shield, Eye, Trash2, Plus, AlertCircle } from 'lucide-react';
+import { uploadVaultDoc } from '@/lib/api';
 
 interface VaultDoc {
   id: string;
@@ -36,28 +39,86 @@ export default function VaultPage() {
   const total = docs.length;
   const completeness = Math.round((uploaded / total) * 100);
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    // Simulate upload
+  // Reference to store which document type is currently being uploaded
+  const [activeUploadType, setActiveUploadType] = useState<string | null>(null);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Default to the first missing doc if no specific type was selected
+    const docTypeToUpload = activeUploadType || docs.find((d) => d.status === 'missing')?.type || 'AADHAR';
+
     setUploading(true);
-    setTimeout(() => {
-      setUploading(false);
-      // Mark first missing doc as pending
+    try {
+      // Send real API request to the backend
+      // Using a placeholder user_id 'user123' for now since auth isn't fully connected
+      const res = await uploadVaultDoc('user123', docTypeToUpload, file);
+      
+      // Update UI state on success
       setDocs((prev) =>
-        prev.map((d, i) =>
-          d.status === 'missing' && !prev.slice(0, i).some((p) => p.status === 'missing')
-            ? { ...d, status: 'pending' as const, fileName: 'uploaded_doc.pdf', uploadedAt: new Date().toISOString().slice(0, 10) }
+        prev.map((d) =>
+          d.type === docTypeToUpload
+            ? { 
+                ...d, 
+                status: (res.data.ai_analysis && !res.data.ai_analysis.is_valid) ? 'pending' : 'verified' as const, 
+                fileName: file.name, 
+                uploadedAt: new Date().toISOString().slice(0, 10) 
+              }
             : d
         )
       );
-    }, 1500);
+    } catch (error) {
+      console.error('Upload failed', error);
+      alert('Upload failed. Ensure backend is running and file is valid.');
+    } finally {
+      setUploading(false);
+      setActiveUploadType(null);
+      // Reset input so the same file can be selected again
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    // Real drag and drop requires manually taking the file from dataTransfer
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      // Create a synthetic event to reuse handleFileSelect logic
+      const synthEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+      handleFileSelect(synthEvent);
+    }
+  };
+
+  const handleDelete = (docType: string) => {
+    if (confirm('Are you sure you want to remove this document from your vault?')) {
+      setDocs((prev) =>
+        prev.map((d) =>
+          d.type === docType
+            ? { ...d, status: 'missing' as const, fileName: undefined, uploadedAt: undefined }
+            : d
+        )
+      );
+    }
+  };
+
+  const handlePreview = (fileName?: string) => {
+    if (fileName) {
+      alert(`Previewing: ${fileName}\n\n(In production, this would open a secure document viewer or PDF preview)`);
+    } else {
+      alert('No file available for preview.');
+    }
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 bg-hummingbird-gradient">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
+    <div className="relative min-h-screen bg-hummingbird-gradient overflow-hidden">
+      <div className="absolute inset-0 z-0 opacity-100 mix-blend-multiply pointer-events-none">
+        <ShaderBackground className="w-full h-full" />
+      </div>
+      <div className="relative z-10 pt-24 pb-16 px-4">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs font-medium text-emerald-300 mb-4">
             <Shield size={14} />
@@ -131,7 +192,7 @@ export default function VaultPage() {
                     <p className="text-[10px] text-[#9ca3af]">PDF, JPG, PNG (max 5MB)</p>
                   </>
                 )}
-                <input id="vault-file-input" type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" />
+                <input id="vault-file-input" type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileSelect} />
               </div>
             </GlassCard>
           </div>
@@ -171,16 +232,27 @@ export default function VaultPage() {
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       {doc.status !== 'missing' ? (
                         <>
-                          <button className="p-2 rounded-lg hover:bg-black/5 text-[#5a5a5a] hover:text-blue-400 transition-colors" title="Preview">
+                          <button 
+                            onClick={() => handlePreview(doc.fileName)}
+                            className="p-2 rounded-lg hover:bg-black/5 text-[#5a5a5a] hover:text-blue-400 transition-colors" 
+                            title="Preview"
+                          >
                             <Eye size={16} />
                           </button>
-                          <button className="p-2 rounded-lg hover:bg-black/5 text-[#5a5a5a] hover:text-red-400 transition-colors" title="Delete">
+                          <button 
+                            onClick={() => handleDelete(doc.type)}
+                            className="p-2 rounded-lg hover:bg-black/5 text-[#5a5a5a] hover:text-red-400 transition-colors" 
+                            title="Delete"
+                          >
                             <Trash2 size={16} />
                           </button>
                         </>
                       ) : (
                         <button
-                          onClick={() => document.getElementById('vault-file-input')?.click()}
+                          onClick={() => {
+                            setActiveUploadType(doc.type);
+                            document.getElementById('vault-file-input')?.click();
+                          }}
                           className="p-2 rounded-lg bg-[#013e4e]/10 text-[#013e4e] hover:bg-[#013e4e]/15 transition-colors"
                           title="Upload"
                         >
@@ -208,6 +280,7 @@ export default function VaultPage() {
             </GlassCard>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

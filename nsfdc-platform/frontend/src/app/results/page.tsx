@@ -1,5 +1,7 @@
 'use client';
 
+import { ShaderBackground } from "@/components/ui/neuro-noise";
+
 import { useState, useEffect, useRef } from 'react';
 import GlassCard from '@/components/GlassCard';
 import { Calculator, TrendingUp, Clock, IndianRupee } from 'lucide-react';
@@ -129,9 +131,13 @@ export default function ResultsPage() {
   const formatINR = (val: number) => '₹' + val.toLocaleString('en-IN');
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 bg-hummingbird-gradient">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
+    <div className="relative min-h-screen bg-hummingbird-gradient overflow-hidden">
+      <div className="absolute inset-0 z-0 opacity-100 mix-blend-multiply pointer-events-none">
+        <ShaderBackground className="w-full h-full" />
+      </div>
+      <div className="relative z-10 pt-24 pb-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs font-medium text-[#013e4e] mb-4">
             <Calculator size={14} />
@@ -272,6 +278,7 @@ export default function ResultsPage() {
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

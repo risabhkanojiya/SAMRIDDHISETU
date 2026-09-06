@@ -259,7 +259,7 @@ export function CombinedScrollSequence({
                     willChange: 'transform, opacity',
                     backfaceVisibility: 'hidden' as const
                   }}
-                  className={`group absolute left-1/2 top-1/2 bg-white rounded-[20px] p-6 border border-black/5 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col overflow-hidden will-change-transform`}
+                  className={`group absolute left-1/2 top-1/2 bg-white rounded-[20px] p-6 border border-black/5 shadow-sm hover:shadow-xl transition-shadow duration-300 cursor-pointer flex flex-col overflow-hidden will-change-transform`}
                 >
                   <div
                     className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg flex-shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-xl`}
