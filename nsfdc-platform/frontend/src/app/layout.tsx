@@ -26,18 +26,15 @@ export const metadata: Metadata = {
 };
 
 import SmoothScroll from "@/components/SmoothScroll";
-import { I18nProvider } from "@/lib/I18nProvider";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${dmSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col relative">
-        <I18nProvider>
-          <SmoothScroll>
-            <Navbar />
-            <main className="flex-1 relative z-10">{children}</main>
-          </SmoothScroll>
-        </I18nProvider>
+        <SmoothScroll>
+          <Navbar />
+          <main className="flex-1 relative z-10">{children}</main>
+        </SmoothScroll>
       </body>
     </html>
   );

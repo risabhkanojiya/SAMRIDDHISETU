@@ -4,22 +4,20 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Globe, Search, FolderOpen, MapPin, Calculator, LogIn } from 'lucide-react';
-import { useTranslation, Locale } from '@/lib/I18nProvider';
 
-const getNavLinks = (t: (key: string) => string) => [
-  { href: '/', label: t('nav.home'), icon: Search },
-  { href: '/recommend', label: t('nav.recommender'), icon: Search },
-  { href: '/results', label: t('nav.calculator'), icon: Calculator },
-  { href: '/locator', label: t('nav.locator'), icon: MapPin },
-  { href: '/vault', label: t('nav.vault'), icon: FolderOpen },
+const navLinks = [
+  { href: '/', label: 'Home', icon: Search },
+  { href: '/recommend', label: 'Find Scheme', icon: Search },
+  { href: '/results', label: 'EMI Calculator', icon: Calculator },
+  { href: '/locator', label: 'Partner Map', icon: MapPin },
+  { href: '/vault', label: 'Digi-Vault', icon: FolderOpen },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { locale, setLocale, t } = useTranslation();
-  const navLinks = getNavLinks(t);
+  const [lang, setLang] = useState<'en' | 'hi'>('en');
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -48,7 +46,7 @@ export default function Navbar() {
               SS
             </div>
             <span className="text-lg font-medium text-[#272727] hidden sm:block tracking-tight">
-              {t('nav.logo')}
+              SamriddhiSetu
             </span>
           </Link>
 
@@ -77,12 +75,12 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {/* Language Toggle */}
             <button
-              onClick={() => setLocale(locale === 'en' ? 'hi' : 'en')}
+              onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
               className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium text-[#5a5a5a] hover:text-[#272727] hover:bg-black/5 transition-all border border-transparent hover:border-[#e5e7eb]"
               title="Switch Language"
             >
               <Globe size={14} />
-              {locale === 'en' ? 'हिन्दी' : 'EN'}
+              {lang === 'en' ? 'हिन्दी' : 'EN'}
             </button>
 
             {/* Login */}
@@ -90,7 +88,7 @@ export default function Navbar() {
               href="/login"
               className="hidden sm:flex items-center justify-center bg-[#013e4e] text-white rounded-full text-[13px] font-medium hover:bg-[#012d39] transition-colors shadow-sm !py-1.5 !px-4"
             >
-              {t('nav.login')}
+              Talk to an expert
             </Link>
 
             {/* Mobile Hamburger */}
@@ -133,7 +131,7 @@ export default function Navbar() {
             href="/login"
             className="flex items-center justify-center gap-2 mt-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-[#013e4e] text-white hover:bg-[#012d39] transition-all"
           >
-            {t('nav.login')}
+            Talk to an expert
           </Link>
         </div>
       </div>
