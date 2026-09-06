@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 
 /**
  * AnimatedPuzzlePatterns — v4 (Swap Engine)
@@ -193,7 +193,7 @@ export function AnimatedPuzzlePatterns() {
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
       {CLUSTERS.map((cluster) => {
         const rand = rng(cluster.id.charCodeAt(0) * 997 + cluster.id.charCodeAt(1));
-        const tiles: JSX.Element[] = [];
+        const tiles: React.ReactNode[] = [];
 
         for (let r = 0; r < cluster.rows; r++) {
           for (let c = 0; c < cluster.cols; c++) {

@@ -2,9 +2,13 @@
 
 import { ShaderBackground } from "@/components/ui/neuro-noise";
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import GlassCard from '@/components/GlassCard';
-import { MapPin, Navigation, Phone, AlertTriangle, CheckCircle, Building2, Search } from 'lucide-react';
+import { MapPin, Navigation, Phone, AlertTriangle, CheckCircle, Building2, Search, Map as MapIcon, KeyRound } from 'lucide-react';
+import { useTranslation } from '@/lib/I18nProvider';
+import dynamic from 'next/dynamic';
+
+const LocatorMap = dynamic(() => import('@/components/LocatorMap'), { ssr: false, loading: () => <div className="absolute inset-0 flex items-center justify-center bg-gray-50 text-gray-400">Loading Map...</div> });
 
 interface Partner {
   id: number;
@@ -42,9 +46,11 @@ function getTypeColor(type: string) {
 }
 
 export default function LocatorPage() {
+  const { t } = useTranslation();
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [maxNpa, setMaxNpa] = useState(5);
   const [locating, setLocating] = useState(false);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([28.6139, 77.2090]);
 
   const filteredPartners = MOCK_PARTNERS.filter((p) => p.npa <= maxNpa);
 
@@ -62,14 +68,14 @@ export default function LocatorPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs font-medium text-blue-300 mb-4">
-            <MapPin size={14} />
-            Geo-Spatial Routing
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs font-medium text-emerald-600 mb-4 bg-emerald-50 border border-emerald-100">
+            <MapIcon size={14} />
+            {t('locator.badge')}
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2">
-            Find <span className="text-[#013e4e]">Channel Partners</span>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#272727]">
+            {t('locator.title')}
           </h1>
-          <p className="text-[#5a5a5a]">Locate the nearest SCA, RRB, or NBFC-MFI with low NPA and available funds.</p>
+          <p className="text-[#5a5a5a]">{t('locator.desc')}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -82,12 +88,12 @@ export default function LocatorPage() {
                 className="w-full btn-primary flex items-center justify-center gap-2 !py-3"
               >
                 <Navigation size={16} className={locating ? 'animate-spin' : ''} />
-                {locating ? 'Locating...' : 'Use My Location'}
+                {locating ? t('common.loading') : t('locator.btn.location')}
               </button>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium text-[#5a5a5a]">Max NPA Filter</label>
+                  <label className="text-xs font-medium text-[#5a5a5a]">{t('locator.filter.npa')}</label>
                   <span className="text-sm font-bold text-[#013e4e]">{maxNpa}%</span>
                 </div>
                 <input
@@ -99,7 +105,7 @@ export default function LocatorPage() {
               </div>
 
               <p className="text-xs text-[#9ca3af]">
-                Showing {filteredPartners.length} partners with NPA ≤ {maxNpa}%
+                {t('locator.info.showing')} {filteredPartners.length} (NPA ≤ {maxNpa}%)
               </p>
             </GlassCard>
 
@@ -112,7 +118,10 @@ export default function LocatorPage() {
                 return (
                   <GlassCard
                     key={partner.id}
-                    onClick={() => setSelectedPartner(partner)}
+                    onClick={() => {
+                      setSelectedPartner(partner);
+                      setMapCenter([partner.lat, partner.lng]);
+                    }}
                     className={`p-4 cursor-pointer transition-all ${
                       selected ? '!border-[#013e4e] !bg-[#013e4e]/10' : ''
                     }`}
@@ -141,66 +150,15 @@ export default function LocatorPage() {
           </div>
 
           {/* ── Right: Map Area ── */}
-          <div className="lg:col-span-2">
-            <GlassCard hover={false} className="p-0 overflow-hidden h-[600px] relative">
-              {/* Dark map placeholder with animated grid */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#0d1117] to-[#161b22]">
-                {/* Grid lines */}
-                <div className="absolute inset-0" style={{
-                  backgroundImage: `
-                    linear-gradient(rgba(124, 58, 237, 0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(124, 58, 237, 0.05) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '50px 50px',
-                }} />
-
-                {/* Simulated partner pins */}
-                {filteredPartners.map((partner, i) => {
-                  const selected = selectedPartner?.id === partner.id;
-                  const x = 15 + (i * 18) % 70;
-                  const y = 15 + (i * 23) % 60;
-
-                  return (
-                    <button
-                      key={partner.id}
-                      onClick={() => setSelectedPartner(partner)}
-                      className={`absolute transition-all duration-300 ${
-                        selected ? 'z-20 scale-125' : 'z-10 hover:scale-110'
-                      }`}
-                      style={{ left: `${x}%`, top: `${y}%` }}
-                      title={partner.name}
-                    >
-                      <div className={`relative ${selected ? 'animate-pulse-glow' : ''}`}>
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          selected
-                            ? 'bg-gradient-to-br from-[#013e4e] to-[#20879e] shadow-lg shadow-violet-500/40'
-                            : 'bg-white/10 border border-white/20'
-                        }`}>
-                          <Building2 size={16} className="text-[#272727]" />
-                        </div>
-                        {selected && (
-                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#013e4e] rotate-45" />
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-
-                {/* User location pin */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30">
-                  <div className="relative">
-                    <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-lg shadow-blue-500/50" />
-                    <div className="absolute inset-0 rounded-full bg-blue-500/30 animate-ping" />
-                  </div>
-                </div>
-
-                {/* Map placeholder text */}
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                  <p className="text-xs text-[#9ca3af] glass px-3 py-1.5 rounded-lg">
-                    📍 Demo view — Set MAPBOX_ACCESS_TOKEN for live maps
-                  </p>
-                </div>
-              </div>
+          <div className="lg:col-span-2 flex flex-col">
+            <GlassCard hover={false} className="p-0 overflow-hidden h-[600px] relative rounded-[20px] shadow-sm border border-black/5 bg-white">
+                <LocatorMap 
+                  mapCenter={mapCenter}
+                  selectedPartner={selectedPartner}
+                  filteredPartners={filteredPartners}
+                  setSelectedPartner={setSelectedPartner}
+                  setMapCenter={setMapCenter}
+                />
             </GlassCard>
 
             {/* Selected partner detail */}
