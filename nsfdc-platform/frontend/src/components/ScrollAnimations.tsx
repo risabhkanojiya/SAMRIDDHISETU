@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { AnimatedPuzzlePatterns } from './ui/animated-puzzle-patterns';
 
 export function useScrollProgress(ref: React.RefObject<HTMLElement | null>) {
   const [progress, setProgress] = useState(0);
@@ -176,10 +177,10 @@ export function CombinedScrollSequence({
   }
 
   const transforms = [
-    `translate(-50%, -50%) translate(${tlX}px, ${tlY}px)`,
-    `translate(-50%, -50%) translate(${trX}px, ${trY}px)`,
-    `translate(-50%, -50%) translate(${blX}px, ${blY}px)`,
-    `translate(-50%, -50%) translate(${brX}px, ${brY}px)`
+    `translate(-50%, -50%) translate3d(${tlX}px, ${tlY}px, 0)`,
+    `translate(-50%, -50%) translate3d(${trX}px, ${trY}px, 0)`,
+    `translate(-50%, -50%) translate3d(${blX}px, ${blY}px, 0)`,
+    `translate(-50%, -50%) translate3d(${brX}px, ${brY}px, 0)`
   ];
 
   return (
@@ -190,23 +191,27 @@ export function CombinedScrollSequence({
     >
       <div 
         className="sticky top-0 h-screen w-full flex items-center overflow-hidden"
-        style={{ backgroundColor: bgColor }}
+        style={{ backgroundColor: bgColor, willChange: 'background-color', transform: 'translate3d(0,0,0)' }}
       >
         <div className="w-full h-full relative flex flex-col justify-center">
           
+          {/* Animated Background Pattern */}
+          <AnimatedPuzzlePatterns />
+
           {/* Text Sequence */}
           <div 
             className="absolute inset-0 flex flex-col justify-center pointer-events-none pl-[40px]"
             style={{ 
               opacity: textOpacity, 
-              transform: `translateY(${textY}px)`,
+              transform: `translate3d(0, ${textY}px, 0)`,
+              willChange: 'opacity, transform',
               display: progress > 0.65 ? 'none' : 'flex' 
             }}
           >
             <div className="overflow-hidden w-full flex justify-start">
               <h2
                 className="text-[4rem] sm:text-[5.5rem] lg:text-[7.5rem] font-medium leading-[1.05] tracking-tight whitespace-nowrap"
-                style={{ transform: `translateX(${line1X}vw)`, color: textColorMain }}
+                style={{ transform: `translate3d(${line1X}vw, 0, 0)`, color: textColorMain, willChange: 'transform' }}
               >
                 {line1}
               </h2>
@@ -214,7 +219,7 @@ export function CombinedScrollSequence({
             <div className="overflow-hidden w-full flex justify-start mt-2">
               <h2
                 className="text-[4rem] sm:text-[5.5rem] lg:text-[7.5rem] font-medium leading-[1.05] tracking-tight whitespace-nowrap"
-                style={{ transform: `translateX(${line2X}vw)`, color: textColorSub }}
+                style={{ transform: `translate3d(${line2X}vw, 0, 0)`, color: textColorSub, willChange: 'transform' }}
               >
                 {line2}
               </h2>
@@ -250,7 +255,9 @@ export function CombinedScrollSequence({
                     transform: transforms[i],
                     width: '320px',
                     height: '240px',
-                    zIndex: 10 + i
+                    zIndex: 10 + i,
+                    willChange: 'transform, opacity',
+                    backfaceVisibility: 'hidden' as const
                   }}
                   className={`group absolute left-1/2 top-1/2 bg-white rounded-[20px] p-6 border border-black/5 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col overflow-hidden will-change-transform`}
                 >

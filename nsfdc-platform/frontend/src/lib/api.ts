@@ -42,8 +42,10 @@ export const getVaultDocs = (user_id: string) =>
 
 export const uploadVaultDoc = (user_id: string, document_type: string, file: File) => {
   const formData = new FormData();
+  formData.append('user_id', user_id);
+  formData.append('document_type', document_type);
   formData.append('file', file);
-  return api.post(`/vault/docs?user_id=${user_id}&document_type=${document_type}`, formData, {
+  return api.post(`/vault/docs`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
