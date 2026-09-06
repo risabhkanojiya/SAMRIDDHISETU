@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Sparkles, GraduationCap, Briefcase, Tractor, Store, Home, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, GraduationCap, Briefcase, Tractor, Store, Home, CheckCircle, Loader2, ExternalLink } from 'lucide-react';
 import GlassCard from '@/components/GlassCard';
 import StepProgress from '@/components/StepProgress';
 import { useAppStore } from '@/store/useAppStore';
@@ -38,6 +38,7 @@ export default function RecommendPage() {
     rationale: string;
     isEligible: boolean;
     maxRepaymentYears: number;
+    officialUrl?: string;
   }
 
   const [step, setStep] = useState(1);
@@ -83,6 +84,7 @@ export default function RecommendPage() {
           rationale: data.rationale,
           isEligible: data.is_eligible,
           maxRepaymentYears: data.max_repayment_years,
+          officialUrl: 'https://nsfdc.nic.in/en/our-schemes',
         };
         setResult(res);
         setRecommendedScheme(res.name);
@@ -341,6 +343,10 @@ export default function RecommendPage() {
                     <MapPin size={18} />
                     {t('recommend.btn.find')}
                   </Link>
+                  <a href={result.officialUrl || "https://nsfdc.nic.in/"} target="_blank" rel="noopener noreferrer" className="bg-white border border-[#013e4e]/20 text-[#013e4e] hover:bg-[#013e4e]/5 transition-colors rounded-full px-6 py-3 font-semibold text-center flex items-center justify-center gap-2">
+                    <ExternalLink size={18} />
+                    Official Site
+                  </a>
                 </div>
               </div>
             </div>
