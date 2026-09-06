@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import GlassCard from '@/components/GlassCard';
 import { Calculator, TrendingUp, Clock, IndianRupee } from 'lucide-react';
+import { useTranslation } from '@/lib/I18nProvider';
 
 interface EmiResult {
   emi: number;
@@ -15,7 +16,8 @@ function drawDonut(
   canvas: HTMLCanvasElement,
   principal: number,
   interest: number,
-  animProgress: number
+  animProgress: number,
+  t: (key: string) => string
 ) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
@@ -65,12 +67,14 @@ function drawDonut(
   ctx.font = `bold ${size * 0.08}px Inter, system-ui`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  // Note: we can hardcode 'Total' or parameterize it. I'll just leave it or use a t() if passed.
   ctx.fillText('Total', cx, cy - size * 0.04);
   ctx.font = `bold ${size * 0.1}px Inter, system-ui`;
   ctx.fillText('₹' + Math.round(total * animProgress).toLocaleString('en-IN'), cx, cy + size * 0.05);
 }
 
 export default function ResultsPage() {
+  const { t } = useTranslation();
   const [loanAmount, setLoanAmount] = useState(200000);
   const [interestRate, setInterestRate] = useState(6.5);
   const [tenureMonths, setTenureMonths] = useState(60);
@@ -123,8 +127,8 @@ export default function ResultsPage() {
   // Draw donut on canvas
   useEffect(() => {
     if (!canvasRef.current || !result) return;
-    drawDonut(canvasRef.current, loanAmount, result.totalInterest, animProgress);
-  }, [animProgress, result, loanAmount]);
+    drawDonut(canvasRef.current, loanAmount, result.totalInterest, animProgress, t);
+  }, [animProgress, result, loanAmount, t]);
 
   const formatINR = (val: number) => '₹' + val.toLocaleString('en-IN');
 
@@ -135,12 +139,12 @@ export default function ResultsPage() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs font-medium text-[#013e4e] mb-4">
             <Calculator size={14} />
-            Dynamic Financial Calculator
+            {t('calc.badge')}
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold mb-2">
-            <span className="text-[#013e4e]">EMI</span> Calculator
+            <span className="text-[#013e4e]">{t('calc.titleHighlight')}</span> {t('calc.title')}
           </h1>
-          <p className="text-[#5a5a5a]">Adjust sliders to project monthly payments with moratorium support.</p>
+          <p className="text-[#5a5a5a]">{t('calc.desc')}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -152,7 +156,7 @@ export default function ResultsPage() {
                 <div className="flex items-center justify-between mb-3">
                   <label className="text-sm font-medium text-[#5a5a5a] flex items-center gap-2">
                     <IndianRupee size={14} className="text-[#013e4e]" />
-                    Loan Amount
+                    {t('calc.loanAmt')}
                   </label>
                   <span className="text-xl font-bold text-[#013e4e]">{formatINR(loanAmount)}</span>
                 </div>
@@ -172,7 +176,7 @@ export default function ResultsPage() {
                 <div className="flex items-center justify-between mb-3">
                   <label className="text-sm font-medium text-[#5a5a5a] flex items-center gap-2">
                     <TrendingUp size={14} className="text-[#013e4e]" />
-                    Interest Rate
+                    {t('calc.rate')}
                   </label>
                   <span className="text-xl font-bold text-[#013e4e]">{interestRate}%</span>
                 </div>
@@ -192,9 +196,9 @@ export default function ResultsPage() {
                 <div className="flex items-center justify-between mb-3">
                   <label className="text-sm font-medium text-[#5a5a5a] flex items-center gap-2">
                     <Clock size={14} className="text-blue-400" />
-                    Tenure
+                    {t('calc.tenure')}
                   </label>
-                  <span className="text-xl font-bold text-blue-300">{tenureMonths} months</span>
+                  <span className="text-xl font-bold text-blue-300">{tenureMonths} {t('common.months')}</span>
                 </div>
                 <input
                   type="range"
@@ -203,7 +207,7 @@ export default function ResultsPage() {
                   onChange={(e) => setTenureMonths(Number(e.target.value))}
                 />
                 <div className="flex justify-between text-[10px] text-[#9ca3af] mt-1">
-                  <span>1 yr</span><span>10 yrs</span>
+                  <span>1 {t('calc.yr')}</span><span>10 {t('calc.yrs')}</span>
                 </div>
               </div>
 
@@ -212,9 +216,9 @@ export default function ResultsPage() {
                 <div className="flex items-center justify-between mb-3">
                   <label className="text-sm font-medium text-[#5a5a5a] flex items-center gap-2">
                     <Clock size={14} className="text-[#013e4e]" />
-                    Moratorium Period
+                    {t('calc.moratorium')}
                   </label>
-                  <span className="text-xl font-bold text-emerald-300">{moratoriumMonths} months</span>
+                  <span className="text-xl font-bold text-emerald-300">{moratoriumMonths} {t('common.months')}</span>
                 </div>
                 <input
                   type="range"
@@ -223,7 +227,7 @@ export default function ResultsPage() {
                   onChange={(e) => setMoratoriumMonths(Number(e.target.value))}
                 />
                 <div className="flex justify-between text-[10px] text-[#9ca3af] mt-1">
-                  <span>0</span><span>12 months</span>
+                  <span>0</span><span>12 {t('common.months')}</span>
                 </div>
               </div>
             </GlassCard>
@@ -240,11 +244,11 @@ export default function ResultsPage() {
               <div className="flex items-center gap-6 mt-6">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-[#013e4e]" />
-                  <span className="text-xs text-[#5a5a5a]">Principal</span>
+                  <span className="text-xs text-[#5a5a5a]">{t('calc.chart.principal')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-amber-500" />
-                  <span className="text-xs text-[#5a5a5a]">Interest</span>
+                  <span className="text-xs text-[#5a5a5a]">{t('calc.chart.interest')}</span>
                 </div>
               </div>
             </GlassCard>
@@ -253,20 +257,20 @@ export default function ResultsPage() {
             {result && (
               <div className="grid grid-cols-2 gap-4">
                 <GlassCard hover={false} glow="gold" className="p-5">
-                  <p className="text-xs text-[#5a5a5a] mb-1">Monthly EMI</p>
+                  <p className="text-xs text-[#5a5a5a] mb-1">{t('calc.res.emi')}</p>
                   <p className="text-2xl font-bold text-[#013e4e]">{formatINR(result.emi)}</p>
                 </GlassCard>
                 <GlassCard hover={false} className="p-5">
-                  <p className="text-xs text-[#5a5a5a] mb-1">Total Payment</p>
+                  <p className="text-xs text-[#5a5a5a] mb-1">{t('calc.res.totalPay')}</p>
                   <p className="text-2xl font-bold text-[#272727]">{formatINR(result.totalPayment)}</p>
                 </GlassCard>
                 <GlassCard hover={false} className="p-5">
-                  <p className="text-xs text-[#5a5a5a] mb-1">Total Interest</p>
+                  <p className="text-xs text-[#5a5a5a] mb-1">{t('calc.res.totalInt')}</p>
                   <p className="text-xl font-bold text-[#013e4e]">{formatINR(result.totalInterest)}</p>
                 </GlassCard>
                 <GlassCard hover={false} className="p-5">
-                  <p className="text-xs text-[#5a5a5a] mb-1">Repayment Period</p>
-                  <p className="text-xl font-bold text-[#013e4e]">{result.effectiveMonths} months</p>
+                  <p className="text-xs text-[#5a5a5a] mb-1">{t('calc.res.repayPeriod')}</p>
+                  <p className="text-xl font-bold text-[#013e4e]">{result.effectiveMonths} {t('common.months')}</p>
                 </GlassCard>
               </div>
             )}

@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from typing import Optional
 from pydantic import BaseModel, Field
 from google import genai
@@ -26,6 +27,22 @@ def get_client() -> genai.Client:
     if not key:
         raise ValueError("GEMINI_API_KEY is missing. Check your .env file in the backend directory.")
     return genai.Client(api_key=key)
+
+
+def _call_with_retry(fn, max_retries: int = 3, base_delay: float = 2.0):
+    """Retry a Gemini API call on transient 503/429 errors with exponential backoff."""
+    for attempt in range(max_retries):
+        try:
+            return fn()
+        except Exception as e:
+            error_str = str(e)
+            is_transient = any(code in error_str for code in ["503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED"])
+            if is_transient and attempt < max_retries - 1:
+                wait = base_delay * (2 ** attempt)
+                print(f"[Gemini] Transient error (attempt {attempt+1}/{max_retries}), retrying in {wait}s...")
+                time.sleep(wait)
+            else:
+                raise
 
 # ---------------------------------------------------------
 # 1. Pydantic Models (Enforcing Strict JSON Output)
@@ -133,17 +150,20 @@ def match_scheme(
     """
 
     client = get_client()
-    response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=user_prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=system_instruction,
-            response_mime_type="application/json",
-            response_schema=SchemeRecommendation,
-            temperature=0.1
-        )
-    )
 
+    def _call():
+        return client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                response_mime_type="application/json",
+                response_schema=SchemeRecommendation,
+                temperature=0.1
+            )
+        )
+
+    response = _call_with_retry(_call)
     return SchemeRecommendation.model_validate_json(response.text)
 
 
@@ -172,18 +192,21 @@ def verify_document_ocr(
     )
 
     client = get_client()
-    response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=[
-            "Inspect and extract details from this government certificate image.",
-            image_part
-        ],
-        config=types.GenerateContentConfig(
-            system_instruction=system_instruction,
-            response_mime_type="application/json",
-            response_schema=CertificateVerificationResult,
-            temperature=0.0
-        )
-    )
 
+    def _call():
+        return client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=[
+                "Inspect and extract details from this government certificate image.",
+                image_part
+            ],
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                response_mime_type="application/json",
+                response_schema=CertificateVerificationResult,
+                temperature=0.0
+            )
+        )
+
+    response = _call_with_retry(_call)
     return CertificateVerificationResult.model_validate_json(response.text)
