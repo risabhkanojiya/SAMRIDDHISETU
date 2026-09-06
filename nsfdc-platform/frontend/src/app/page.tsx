@@ -6,59 +6,60 @@ import GlassCard from '@/components/GlassCard';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import { CombinedScrollSequence } from '@/components/ScrollAnimations';
 import { AsciiObject } from '@/components/canvasui/AsciiObject';
-import MotionButton from '@/components/ui/motion-button';
-
-
-const features = [
-  {
-    icon: Sparkles,
-    title: 'AI Scheme Recommender',
-    desc: 'Answer 4 simple questions. Our AI matches you to the perfect NSFDC credit scheme instantly.',
-    href: '/recommend',
-    color: 'from-[#013e4e] to-[#1a6b80]',
-    glow: 'violet' as const,
-  },
-  {
-    icon: Calculator,
-    title: 'EMI Calculator',
-    desc: 'Visualize monthly payments with dynamic sliders. Accounts for moratorium periods and scheme rates.',
-    href: '/results',
-    color: 'from-amber-400 to-orange-500',
-    glow: 'gold' as const,
-  },
-  {
-    icon: MapPin,
-    title: 'Partner Locator',
-    desc: 'Find the nearest SCA, RRB, or NBFC-MFI on an interactive map. Filters out high-NPA partners.',
-    href: '/locator',
-    color: 'from-blue-500 to-cyan-500',
-    glow: 'none' as const,
-  },
-  {
-    icon: Shield,
-    title: 'Smart Digi-Vault',
-    desc: 'Upload KYC documents once. Auto-attached to your application when you apply for a scheme.',
-    href: '/vault',
-    color: 'from-emerald-500 to-teal-600',
-    glow: 'none' as const,
-  },
-];
-
-const steps = [
-  { num: '01', title: 'Choose Language', desc: 'Select Hindi, English, or use voice input' },
-  { num: '02', title: 'Answer 4 Questions', desc: 'Income, project type, cost & education' },
-  { num: '03', title: 'Get Matched', desc: 'AI recommends the best scheme for you' },
-  { num: '04', title: 'Apply Digitally', desc: 'Auto-route to nearest eligible partner' },
-];
-
-const stats = [
-  { value: 100, suffix: '+', label: 'Channel Partners' },
-  { value: 6, suffix: '', label: 'Credit Schemes' },
-  { value: 50, prefix: '₹', suffix: 'L', label: 'Max Loan Amount' },
-  { value: 6.5, suffix: '%', label: 'Starting Interest' },
-];
+import { useTranslation } from '@/lib/I18nProvider';
 
 export default function Home() {
+  const { t } = useTranslation();
+
+  const features = [
+    {
+      icon: Sparkles,
+      title: t('home.features.ai.title'),
+      desc: t('home.features.ai.desc'),
+      href: '/recommend',
+      color: 'from-[#013e4e] to-[#1a6b80]',
+      glow: 'violet' as const,
+    },
+    {
+      icon: Calculator,
+      title: t('home.features.emi.title'),
+      desc: t('home.features.emi.desc'),
+      href: '/results',
+      color: 'from-amber-400 to-orange-500',
+      glow: 'gold' as const,
+    },
+    {
+      icon: MapPin,
+      title: t('home.features.map.title'),
+      desc: t('home.features.map.desc'),
+      href: '/locator',
+      color: 'from-blue-500 to-cyan-500',
+      glow: 'none' as const,
+    },
+    {
+      icon: Shield,
+      title: t('home.features.vault.title'),
+      desc: t('home.features.vault.desc'),
+      href: '/vault',
+      color: 'from-emerald-500 to-teal-600',
+      glow: 'none' as const,
+    },
+  ];
+
+  const steps = [
+    { num: '01', title: t('home.steps.s1'), desc: t('home.steps.s1desc') },
+    { num: '02', title: t('home.steps.s2'), desc: t('home.steps.s2desc') },
+    { num: '03', title: t('home.steps.s3'), desc: t('home.steps.s3desc') },
+    { num: '04', title: t('home.steps.s4'), desc: t('home.steps.s4desc') },
+  ];
+
+  const stats = [
+    { value: 100, suffix: '+', label: t('home.stats.p1') },
+    { value: 6, suffix: '', label: t('home.stats.p2') },
+    { value: 50, prefix: '₹', suffix: 'L', label: t('home.stats.p3') },
+    { value: 6.5, suffix: '%', label: t('home.stats.p4') },
+  ];
+
   return (
     <div className="relative">
       {/* ═══ HERO SECTION ═══ */}
@@ -97,28 +98,31 @@ export default function Home() {
             {/* Badge */}
             <div className="animate-fade-in-down inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-[#e5e7eb] text-xs font-semibold text-[#4b5563] mb-8 shadow-sm">
               <Sparkles size={14} className="text-[#013e4e]" />
-              NSFDC Digital Platform — Powered by AI
+              {t('home.badge')}
             </div>
 
             {/* Main Heading */}
             <h1 className="text-[4rem] sm:text-[5rem] lg:text-[6rem] font-medium leading-[1.05] tracking-tight text-[#272727] mb-6">
-              Samriddhi<span className="text-[#013e4e]">Setu</span>
+              {t('home.title')}<span className="text-[#013e4e]">{t('home.titleHighlight')}</span>
             </h1>
 
             <p className="text-xl lg:text-2xl text-[#272727] mb-4 max-w-lg leading-relaxed font-semibold">
-              Intelligent financial assistance for{' '}
-              <span className="text-[#013e4e]">Scheduled Caste</span> beneficiaries.
+              {t('home.subtitle')}
+              <span className="text-[#013e4e]">{t('home.subtitleHighlight')}</span> 
+              {t('home.subtitleEnd')}
             </p>
 
             <p className="text-base lg:text-lg text-[#5a5a5a] mb-10 max-w-md leading-relaxed font-normal">
-              Do more with less using the only platform that delivers AI-powered scheme discovery, EMI projections, and geo-spatial routing at every step.
+              {t('home.desc')}
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-4 mb-16">
-              <MotionButton href="/recommend" label="Find Your Scheme" classes="w-full sm:w-auto" />
-              <Link href="/locator" className="bg-white text-[#013e4e] px-7 py-3.5 rounded-[30px] font-medium text-base border border-[#e5e7eb] transition-all duration-500 ease-out hover:bg-[#013e4e] hover:text-white hover:border-[#013e4e] flex justify-center items-center gap-2 shadow-sm hover:shadow-md w-full sm:w-auto">
-                <MapPin size={16} /> Locate Partner
+              <Link href="/recommend" className="bg-[#013e4e] text-white px-7 py-3.5 rounded-[30px] font-medium text-base hover:bg-[#012d39] transition-colors shadow-sm w-full sm:w-auto text-center flex items-center justify-center gap-2">
+                {t('home.cta.recommender')} <ArrowRight size={16} />
+              </Link>
+              <Link href="/locator" className="bg-[#f4f4f1] text-[#272727] px-7 py-3.5 rounded-[30px] font-medium text-base border border-[#d1d1d1] hover:bg-white transition-colors flex justify-center items-center gap-2 shadow-sm w-full sm:w-auto">
+                <MapPin size={16} /> {t('home.cta.locator')}
               </Link>
             </div>
 
@@ -146,39 +150,37 @@ export default function Home() {
 
       {/* ═══ HUMMINGBIRD-STYLE COMBINED SCROLL SEQUENCE ═══ */}
       <CombinedScrollSequence
-        line1="Everything you need,"
-        line2="one platform."
-        subtitle="From scheme discovery to application submission — seamlessly connected modules designed for rural and semi-urban users."
+        line1={t('home.scroll.l1')}
+        line2={t('home.scroll.l2')}
+        subtitle={t('home.scroll.subtitle')}
         features={features}
       />
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section className="relative py-28 px-4 bg-white">
+      <section className="relative py-24 px-4 bg-[#013e4e]">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <p className="text-sm font-semibold text-[#013e4e] uppercase tracking-widest mb-4">How it works</p>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-[#272727]">
-              Apply in{' '}
-              <span className="text-[#013e4e]">4 simple steps</span>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-[#f4f4f1]">
+              {t('home.steps.title')} <span className="text-amber-400">{t('home.steps.highlight')}</span>
             </h2>
-            <p className="text-[#5a5a5a] max-w-xl mx-auto leading-relaxed">
-              No paperwork. No bank visits. Complete your entire application digitally in under 5 minutes.
+            <p className="text-[#f4f4f1]/60 max-w-xl mx-auto">
+              {t('home.steps.desc')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {steps.map((step, i) => (
-              <div key={i} className="p-6 relative overflow-hidden group bg-[#f8f9fa] border border-[#e5e7eb] rounded-[16px] hover:bg-white hover:shadow-lg hover:border-[#013e4e]/20 transition-all duration-300 hover:-translate-y-1">
+              <div key={i} className="p-6 relative overflow-hidden group bg-white/[0.08] backdrop-blur-sm border border-white/10 rounded-[14px] hover:bg-white/[0.14] transition-all duration-200 hover:-translate-y-1">
                 {/* Step number background */}
-                <div className="absolute -top-4 -right-2 text-7xl font-black text-[#013e4e]/[0.04] group-hover:text-[#013e4e]/[0.08] transition-colors duration-500">
+                <div className="absolute -top-4 -right-2 text-7xl font-black text-white/[0.04] group-hover:text-white/[0.08] transition-colors duration-500">
                   {step.num}
                 </div>
                 <div className="relative z-10">
-                  <div className="text-xs font-bold text-[#013e4e] mb-3 tracking-widest">
+                  <div className="text-xs font-bold text-amber-400 mb-3 tracking-widest">
                     STEP {step.num}
                   </div>
-                  <h3 className="text-lg font-bold text-[#272727] mb-2">{step.title}</h3>
-                  <p className="text-sm text-[#5a5a5a] leading-relaxed">{step.desc}</p>
+                  <h3 className="text-lg font-bold text-[#f4f4f1] mb-2">{step.title}</h3>
+                  <p className="text-sm text-[#f4f4f1]/60">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -196,19 +198,19 @@ export default function Home() {
 
             <div className="relative z-10">
               <h2 className="text-3xl font-bold mb-4 text-[#272727]">
-                Ready to find your <span className="gradient-text-gold">scheme</span>?
+                {t('home.cta2.title')} <span className="gradient-text-gold">{t('home.cta2.highlight')}</span>?
               </h2>
               <p className="text-[#5a5a5a] mb-8 max-w-lg mx-auto">
-                Join thousands of SC beneficiaries who have discovered their eligible NSFDC credit schemes digitally.
+                {t('home.cta2.desc')}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/recommend" className="btn-gold flex items-center gap-2 !px-8 !py-3">
                   <Search size={18} />
-                  Start Scheme Finder
+                  {t('home.cta2.start')}
                 </Link>
                 <Link href="/vault" className="btn-ghost flex items-center gap-2 !px-8 !py-3">
                   <FileCheck size={18} />
-                  Upload Documents
+                  {t('home.cta2.upload')}
                 </Link>
               </div>
             </div>
@@ -223,11 +225,11 @@ export default function Home() {
             <div className="w-6 h-6 rounded-lg bg-[#013e4e] flex items-center justify-center text-white text-[10px] font-bold">
               SS
             </div>
-            SamriddhiSetu — Team Tatkal
+            {t('home.footer.credits')}
           </div>
           <div className="flex items-center gap-1">
             <Mic size={14} />
-            Powered by Bhashini, Gemini AI & PostGIS
+            {t('home.footer.tech')}
           </div>
         </div>
       </footer>

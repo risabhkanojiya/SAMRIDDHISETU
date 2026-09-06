@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import GlassCard from '@/components/GlassCard';
 import { MapPin, Navigation, Phone, AlertTriangle, CheckCircle, Building2, Search, Map as MapIcon, KeyRound } from 'lucide-react';
+import { useTranslation } from '@/lib/I18nProvider';
 import dynamic from 'next/dynamic';
 
 const LocatorMap = dynamic(() => import('@/components/LocatorMap'), { ssr: false, loading: () => <div className="absolute inset-0 flex items-center justify-center bg-gray-50 text-gray-400">Loading Map...</div> });
@@ -43,6 +44,7 @@ function getTypeColor(type: string) {
 }
 
 export default function LocatorPage() {
+  const { t } = useTranslation();
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [maxNpa, setMaxNpa] = useState(5);
   const [locating, setLocating] = useState(false);
@@ -62,12 +64,12 @@ export default function LocatorPage() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs font-medium text-emerald-600 mb-4 bg-emerald-50 border border-emerald-100">
             <MapIcon size={14} />
-            Live Map Integration Active
+            {t('locator.badge')}
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2">
-            Find <span className="text-[#013e4e]">Channel Partners</span>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#272727]">
+            {t('locator.title')}
           </h1>
-          <p className="text-[#5a5a5a]">Locate the nearest SCA, RRB, or NBFC-MFI with low NPA and available funds.</p>
+          <p className="text-[#5a5a5a]">{t('locator.desc')}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -80,12 +82,12 @@ export default function LocatorPage() {
                 className="w-full btn-primary flex items-center justify-center gap-2 !py-3"
               >
                 <Navigation size={16} className={locating ? 'animate-spin' : ''} />
-                {locating ? 'Locating...' : 'Use My Location'}
+                {locating ? t('common.loading') : t('locator.btn.location')}
               </button>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium text-[#5a5a5a]">Max NPA Filter</label>
+                  <label className="text-xs font-medium text-[#5a5a5a]">{t('locator.filter.npa')}</label>
                   <span className="text-sm font-bold text-[#013e4e]">{maxNpa}%</span>
                 </div>
                 <input
@@ -97,7 +99,7 @@ export default function LocatorPage() {
               </div>
 
               <p className="text-xs text-[#9ca3af]">
-                Showing {filteredPartners.length} partners with NPA ≤ {maxNpa}%
+                {t('locator.info.showing')} {filteredPartners.length} (NPA ≤ {maxNpa}%)
               </p>
             </GlassCard>
 

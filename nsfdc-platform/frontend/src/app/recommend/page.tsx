@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslation } from '@/lib/I18nProvider';
-import { getRecommendation } from '@/lib/api';
-import { ArrowLeft, ArrowRight, Sparkles, GraduationCap, Briefcase, Tractor, Store, Home, CheckCircle, Loader2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, GraduationCap, Briefcase, Tractor, Store, Home, CheckCircle, Loader2, ExternalLink, AlertTriangle } from 'lucide-react';
 import GlassCard from '@/components/GlassCard';
 import StepProgress from '@/components/StepProgress';
 import { useAppStore } from '@/store/useAppStore';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/I18nProvider';
+import { getRecommendation } from '@/lib/api';
 
 const PROJECT_TYPES = [
   { value: 'micro_enterprise', label: 'Micro Enterprise', desc: 'Small business up to ₹1.40 Lakh', icon: Store },
@@ -111,6 +111,7 @@ export default function RecommendPage() {
     maxRepaymentYears: number;
     officialUrl?: string;
   }
+
   const [step, setStep] = useState(1);
   const [projectType, setProjectType] = useState('');
   const [estimatedCost, setEstimatedCost] = useState(200000);
@@ -175,12 +176,12 @@ export default function RecommendPage() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#e5e7eb] shadow-sm text-xs font-semibold text-[#013e4e] mb-4">
             <Sparkles size={14} />
-            AI-Powered Matching
+            {t('recommend.badge')}
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#272727]">
-            Find Your <span className="text-[#013e4e]">Perfect Scheme</span>
+            {t('recommend.title')} <span className="text-[#013e4e]">{t('recommend.titleHighlight')}</span>
           </h1>
-          <p className="text-[#5a5a5a] text-lg">Answer 3 quick questions and we'll match you.</p>
+          <p className="text-[#5a5a5a] text-lg">{t('recommend.desc')}</p>
         </div>
 
         {/* Step Progress */}
@@ -188,15 +189,15 @@ export default function RecommendPage() {
           <StepProgress
             currentStep={step}
             totalSteps={4}
-            labels={['Project Type', 'Cost & Income', 'Education', 'Result']}
+            labels={[t('recommend.prog.proj'), t('recommend.prog.fin'), t('recommend.prog.edu'), t('recommend.prog.res')]}
           />
         </div>
 
         {/* ── STEP 1: Project Type ── */}
         {step === 1 && (
           <div className="animate-fade-in-up">
-            <h2 className="text-xl font-bold text-[#272727] mb-2">What is your project type?</h2>
-            <p className="text-[#5a5a5a] text-sm mb-6">Select the category that best describes your need.</p>
+            <h2 className="text-xl font-bold text-[#272727] mb-2">{t('recommend.step.project')}</h2>
+            <p className="text-[#5a5a5a] text-sm mb-6">{t('recommend.step.projectDesc')}</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {PROJECT_TYPES.map((pt) => {
@@ -237,13 +238,13 @@ export default function RecommendPage() {
         {/* ── STEP 2: Cost & Income ── */}
         {step === 2 && (
           <div className="animate-fade-in-up">
-            <h2 className="text-xl font-bold text-[#272727] mb-2">Your financials</h2>
-            <p className="text-[#5a5a5a] text-sm mb-8">Adjust the sliders to match your situation.</p>
+            <h2 className="text-xl font-bold text-[#272727] mb-2">{t('recommend.step.finance')}</h2>
+            <p className="text-[#5a5a5a] text-sm mb-8">{t('recommend.step.financeDesc')}</p>
 
             <div className="bg-white rounded-[20px] p-8 space-y-8 border border-black/5 shadow-sm">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium text-[#5a5a5a]">Estimated Project Cost</label>
+                  <label className="text-sm font-medium text-[#5a5a5a]">{t('recommend.fin.cost')}</label>
                   <span className="text-lg font-bold text-[#013e4e]">{formatINR(estimatedCost)}</span>
                 </div>
                 <input
@@ -263,7 +264,7 @@ export default function RecommendPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium text-[#5a5a5a]">Annual Family Income</label>
+                  <label className="text-sm font-medium text-[#5a5a5a]">{t('recommend.fin.income')}</label>
                   <span className="text-lg font-bold text-[#013e4e]">{formatINR(annualIncome)}</span>
                 </div>
                 <input
@@ -287,8 +288,8 @@ export default function RecommendPage() {
         {/* ── STEP 3: Education ── */}
         {step === 3 && (
           <div className="animate-fade-in-up">
-            <h2 className="text-xl font-bold text-[#272727] mb-2">Education Level</h2>
-            <p className="text-[#5a5a5a] text-sm mb-6">This helps match you with education-specific schemes.</p>
+            <h2 className="text-xl font-bold text-[#272727] mb-2">{t('recommend.step.edu')}</h2>
+            <p className="text-[#5a5a5a] text-sm mb-6">{t('recommend.step.eduDesc')}</p>
 
             <div className="space-y-3">
               {EDUCATION_OPTIONS.map((opt) => {
@@ -397,6 +398,13 @@ export default function RecommendPage() {
         )}
 
         {/* Navigation buttons */}
+        {error && (
+          <div className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 flex items-center gap-3 animate-fade-in-up mt-8">
+            <AlertTriangle size={18} className="shrink-0" />
+            <p className="text-sm font-medium">{error}</p>
+          </div>
+        )}
+        
         {step < 4 && (
           <div className="flex items-center justify-between mt-8">
             <button
@@ -405,15 +413,24 @@ export default function RecommendPage() {
               className="btn-ghost flex items-center gap-2 disabled:opacity-30 disabled:pointer-events-none"
             >
               <ArrowLeft size={16} />
-              Back
+              {t('common.back')}
             </button>
             <button
               onClick={handleNext}
-              disabled={!canProceed()}
-              className="btn-primary flex items-center gap-2 disabled:opacity-30 disabled:pointer-events-none"
+              disabled={!canProceed() || loading}
+              className="btn-primary flex items-center gap-2 disabled:opacity-30 disabled:pointer-events-none transition-all"
             >
-              {step === 3 ? 'Get Recommendation' : 'Next'}
-              {step === 3 ? <Sparkles size={16} /> : <ArrowRight size={16} />}
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  {t('common.loading')}
+                </>
+              ) : (
+                <>
+                  {step === 3 ? t('recommend.btn.ai') : t('common.next')}
+                  {step === 3 ? <Sparkles size={16} /> : <ArrowRight size={16} />}
+                </>
+              )}
             </button>
           </div>
         )}

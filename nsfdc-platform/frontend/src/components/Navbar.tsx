@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Globe, Search, FolderOpen, MapPin, Calculator, LogIn } from 'lucide-react';
-import { useTranslation } from '@/lib/I18nProvider';
+import { useTranslation, Locale } from '@/lib/I18nProvider';
 
-const navLinks = [
-  { href: '/', i18nKey: 'nav.home', icon: Search },
-  { href: '/recommend', i18nKey: 'nav.recommender', icon: Search },
-  { href: '/results', i18nKey: 'nav.calculator', icon: Calculator },
-  { href: '/locator', i18nKey: 'nav.locator', icon: MapPin },
-  { href: '/vault', i18nKey: 'nav.vault', icon: FolderOpen },
+const getNavLinks = (t: (key: string) => string) => [
+  { href: '/', label: t('nav.home'), icon: Search },
+  { href: '/recommend', label: t('nav.recommender'), icon: Search },
+  { href: '/results', label: t('nav.calculator'), icon: Calculator },
+  { href: '/locator', label: t('nav.locator'), icon: MapPin },
+  { href: '/vault', label: t('nav.vault'), icon: FolderOpen },
 ];
 
 export default function Navbar() {
@@ -19,6 +19,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { locale, setLocale, t } = useTranslation();
+  const navLinks = getNavLinks(t);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -47,7 +48,7 @@ export default function Navbar() {
               SS
             </div>
             <span className="text-lg font-medium text-[#272727] hidden sm:block tracking-tight">
-              SamriddhiSetu
+              {t('nav.logo')}
             </span>
           </Link>
 
@@ -66,7 +67,7 @@ export default function Navbar() {
                       : 'text-[#5a5a5a] hover:text-[#272727] hover:bg-black/5'
                   }`}
                 >
-                  {t(link.i18nKey)}
+                  {link.label}
                 </Link>
               );
             })}
@@ -124,7 +125,7 @@ export default function Navbar() {
                 }`}
               >
                 <Icon size={16} />
-                {t(link.i18nKey)}
+                {link.label}
               </Link>
             );
           })}
@@ -132,7 +133,7 @@ export default function Navbar() {
             href="/login"
             className="flex items-center justify-center gap-2 mt-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-[#013e4e] text-white hover:bg-[#012d39] transition-all"
           >
-            Talk to an expert
+            {t('nav.login')}
           </Link>
         </div>
       </div>
