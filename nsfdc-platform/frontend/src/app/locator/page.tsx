@@ -4,9 +4,10 @@ import { ShaderBackground } from "@/components/ui/neuro-noise";
 
 import { useState, useMemo, useEffect } from 'react';
 import GlassCard from '@/components/GlassCard';
-import { MapPin, Navigation, Phone, AlertTriangle, CheckCircle, Building2, Search, Map as MapIcon, KeyRound } from 'lucide-react';
+import { MapPin, Navigation, Phone, AlertTriangle, CheckCircle, Building2, Search, Map as MapIcon, KeyRound, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/lib/I18nProvider';
 import dynamic from 'next/dynamic';
+import { getNearestPartners } from '@/lib/api';
 
 const LocatorMap = dynamic(() => import('@/components/LocatorMap'), { ssr: false, loading: () => <div className="absolute inset-0 flex items-center justify-center bg-gray-50 text-gray-400">Loading Map...</div> });
 
@@ -47,16 +48,61 @@ function getTypeColor(type: string) {
 
 export default function LocatorPage() {
   const { t } = useTranslation();
+  const [partners, setPartners] = useState<Partner[]>(MOCK_PARTNERS);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [maxNpa, setMaxNpa] = useState(5);
   const [locating, setLocating] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>([28.6139, 77.2090]);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
-  const filteredPartners = MOCK_PARTNERS.filter((p) => p.npa <= maxNpa);
+  const filteredPartners = partners.filter((p) => p.npa <= maxNpa);
 
   const handleLocate = () => {
     setLocating(true);
-    setTimeout(() => setLocating(false), 2000);
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by your browser.');
+      setLocating(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setMapCenter([latitude, longitude]);
+
+        try {
+          const response = await getNearestPartners(latitude, longitude, maxNpa);
+          const data = response.data;
+          if (data.partners && data.partners.length > 0) {
+            const mapped: Partner[] = data.partners.map((p: any, i: number) => ({
+              id: p.id || i + 1,
+              name: p.name,
+              type: p.partner_type || 'SCA',
+              npa: p.npa_percentage || 0,
+              distance: p.distance_km || 0,
+              phone: p.contact_info || 'N/A',
+              lat: p.lat,
+              lng: p.lng,
+              fundUtil: p.fund_utilization || 0,
+            }));
+            setPartners(mapped);
+          }
+        } catch (err) {
+          console.warn('Partners API unavailable, using mock data:', err);
+          // Keep existing mock data
+        } finally {
+          setLocating(false);
+        }
+      },
+      (error) => {
+        console.warn('Geolocation error:', error.message);
+        setLocationError('Could not get your location. Using default area.');
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   return (

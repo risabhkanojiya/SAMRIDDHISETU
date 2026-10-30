@@ -6,6 +6,7 @@ import { useState } from 'react';
 import GlassCard from '@/components/GlassCard';
 import { Upload, FileText, CheckCircle, XCircle, Shield, Eye, Trash2, Plus, AlertCircle } from 'lucide-react';
 import { uploadVaultDoc } from '@/lib/api';
+import { useTranslation } from '@/lib/I18nProvider';
 
 interface VaultDoc {
   id: string;
@@ -14,12 +15,13 @@ interface VaultDoc {
   status: 'verified' | 'pending' | 'missing';
   fileName?: string;
   uploadedAt?: string;
+  fileUrl?: string;
 }
 
 const ALL_DOC_TYPES: VaultDoc[] = [
-  { id: '1', type: 'AADHAR', label: 'Aadhaar Card', status: 'verified', fileName: 'aadhar_card.pdf', uploadedAt: '2024-12-15' },
-  { id: '2', type: 'CASTE_CERT', label: 'Caste Certificate', status: 'verified', fileName: 'caste_cert.pdf', uploadedAt: '2024-12-15' },
-  { id: '3', type: 'INCOME_CERT', label: 'Income Certificate', status: 'pending', fileName: 'income_proof.jpg', uploadedAt: '2025-01-02' },
+  { id: '1', type: 'AADHAR', label: 'Aadhaar Card', status: 'missing' },
+  { id: '2', type: 'CASTE_CERT', label: 'Caste Certificate', status: 'missing' },
+  { id: '3', type: 'INCOME_CERT', label: 'Income Certificate', status: 'missing' },
   { id: '4', type: 'ADMISSION_LETTER', label: 'Admission Letter', status: 'missing' },
   { id: '5', type: 'PROJECT_REPORT', label: 'Project Report', status: 'missing' },
 ];
@@ -31,6 +33,7 @@ const statusConfig = {
 };
 
 export default function VaultPage() {
+  const { t } = useTranslation();
   const [docs, setDocs] = useState(ALL_DOC_TYPES);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -56,6 +59,7 @@ export default function VaultPage() {
       const res = await uploadVaultDoc('user123', docTypeToUpload, file);
       
       // Update UI state on success
+      const newFileUrl = URL.createObjectURL(file);
       setDocs((prev) =>
         prev.map((d) =>
           d.type === docTypeToUpload
@@ -63,7 +67,8 @@ export default function VaultPage() {
                 ...d, 
                 status: (res.data.ai_analysis && !res.data.ai_analysis.is_valid) ? 'pending' : 'verified' as const, 
                 fileName: file.name, 
-                uploadedAt: new Date().toISOString().slice(0, 10) 
+                uploadedAt: new Date().toISOString().slice(0, 10),
+                fileUrl: newFileUrl
               }
             : d
         )
@@ -103,9 +108,11 @@ export default function VaultPage() {
     }
   };
 
-  const handlePreview = (fileName?: string) => {
-    if (fileName) {
-      alert(`Previewing: ${fileName}\n\n(In production, this would open a secure document viewer or PDF preview)`);
+  const handlePreview = (doc: VaultDoc) => {
+    if (doc.fileUrl) {
+      window.open(doc.fileUrl, '_blank');
+    } else if (doc.fileName) {
+      alert(`Previewing: ${doc.fileName}\n\n(No local file blob available, maybe it was uploaded previously)`);
     } else {
       alert('No file available for preview.');
     }
@@ -119,16 +126,16 @@ export default function VaultPage() {
       <div className="relative z-10 pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs font-medium text-emerald-300 mb-4">
-            <Shield size={14} />
-            Encrypted & Secure
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs font-medium text-[#013e4e] mb-4">
+              <Shield size={14} />
+              {t('vault.badge')}
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2">
+              {t('vault.title')} <span className="text-[#013e4e]">{t('vault.titleHighlight')}</span>
+            </h1>
+            <p className="text-[#5a5a5a]">{t('vault.desc')}</p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2">
-            Smart <span className="text-[#013e4e]">Digi-Vault</span>
-          </h1>
-          <p className="text-[#5a5a5a]">Upload once, auto-attach everywhere. Your documents are safe with us.</p>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* ── Left: Upload + Completeness ── */}
@@ -154,10 +161,10 @@ export default function VaultPage() {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-2xl font-bold text-[#272727]">{completeness}%</span>
-                  <span className="text-[10px] text-[#5a5a5a]">Complete</span>
+                  <span className="text-[10px] text-[#5a5a5a]">{t('vault.progress.complete')}</span>
                 </div>
               </div>
-              <p className="text-sm text-[#5a5a5a]">{uploaded} of {total} documents uploaded</p>
+              <p className="text-sm text-[#5a5a5a]">{uploaded} {t('vault.progress.of')} {total} {t('vault.progress.uploaded')}</p>
             </GlassCard>
 
             {/* Upload Area */}
@@ -181,15 +188,15 @@ export default function VaultPage() {
                 {uploading ? (
                   <div className="py-4">
                     <div className="w-10 h-10 mx-auto mb-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm text-[#013e4e] font-medium">Uploading...</p>
+                    <p className="text-sm text-[#013e4e] font-medium">{t('vault.uploading')}</p>
                   </div>
                 ) : (
                   <>
                     <Upload size={32} className={`mx-auto mb-3 ${dragOver ? 'text-[#013e4e] animate-bounce' : 'text-[#9ca3af]'}`} />
                     <p className="text-sm text-[#5a5a5a] mb-1">
-                      <span className="text-[#013e4e] font-medium">Click to upload</span> or drag & drop
+                      <span className="text-[#013e4e] font-medium">{t('vault.upload.click')}</span> {t('vault.upload.drag')}
                     </p>
-                    <p className="text-[10px] text-[#9ca3af]">PDF, JPG, PNG (max 5MB)</p>
+                    <p className="text-[10px] text-[#9ca3af]">{t('vault.upload.formats')}</p>
                   </>
                 )}
                 <input id="vault-file-input" type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileSelect} />
@@ -214,17 +221,19 @@ export default function VaultPage() {
                     {/* Details */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-[#272727] text-sm">{doc.label}</h3>
+                        <h3 className="font-semibold text-[#272727] text-sm">
+                          {doc.type === 'AADHAR' ? t('vault.doc.aadhar') : doc.type === 'CASTE_CERT' ? t('vault.doc.caste') : doc.type === 'INCOME_CERT' ? t('vault.doc.income') : doc.type === 'ADMISSION_LETTER' ? t('vault.doc.admission') : t('vault.doc.project')}
+                        </h3>
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${config.bg} ${config.color}`}>
                           <Icon size={10} />
-                          {config.label}
+                          {doc.status === 'verified' ? t('vault.status.verified') : doc.status === 'pending' ? t('vault.status.pending') : t('vault.status.missing')}
                         </span>
                       </div>
                       {doc.fileName && (
                         <p className="text-xs text-[#9ca3af] mt-0.5 truncate">{doc.fileName}</p>
                       )}
                       {doc.uploadedAt && (
-                        <p className="text-[10px] text-[#9ca3af]">Uploaded: {doc.uploadedAt}</p>
+                        <p className="text-[10px] text-[#9ca3af]">{t('vault.doc.uploadedOn')} {doc.uploadedAt}</p>
                       )}
                     </div>
 
@@ -233,7 +242,7 @@ export default function VaultPage() {
                       {doc.status !== 'missing' ? (
                         <>
                           <button 
-                            onClick={() => handlePreview(doc.fileName)}
+                            onClick={() => handlePreview(doc)}
                             className="p-2 rounded-lg hover:bg-black/5 text-[#5a5a5a] hover:text-blue-400 transition-colors" 
                             title="Preview"
                           >
@@ -270,10 +279,9 @@ export default function VaultPage() {
               <div className="flex items-start gap-3">
                 <AlertCircle size={20} className="text-[#013e4e] shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-semibold text-[#013e4e] text-sm mb-1">Auto-attachment Ready</h4>
+                  <h4 className="font-semibold text-[#013e4e] text-sm mb-1">{t('vault.auto.title')}</h4>
                   <p className="text-xs text-[#5a5a5a]">
-                    When you apply for a scheme, SamriddhiSetu will automatically pull the required documents
-                    from your vault and attach them to your application. No re-uploads needed.
+                    {t('vault.auto.desc')}
                   </p>
                 </div>
               </div>

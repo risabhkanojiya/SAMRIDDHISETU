@@ -1,1 +1,31 @@
-.env 
+# Environment files
+.env
+.env*.local
+*.env
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Python virtual environment & cache
+venv/
+.venv/
+env/
+**/__pycache__/
+*.py[cod]
+*$py.class
+**/venv/
+**/.venv/
+
+# Next.js build output
+.next/
+**/.next/
+out/
+build/
+dist/
+
+# IDE & OS
+.vscode/
+.DS_Store
+*.pem
+*.log

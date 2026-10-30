@@ -1,190 +1,196 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import GlassCard from '@/components/GlassCard';
-import ParticleBackground from '@/components/ParticleBackground';
-import { Phone, ArrowRight, CheckCircle, Shield } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [verifying, setVerifying] = useState(false);
-  const [verified, setVerified] = useState(false);
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
-  const handleSendOtp = () => {
-    if (phoneNumber.length >= 10) {
-      setOtpSent(true);
-    }
-  };
+    // --- Liquid Physics Background Logic ---
+    const [mounted, setMounted] = useState(false);
+    const [blobsData, setBlobsData] = useState<any[]>([]);
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) value = value.slice(-1);
-    if (!/^\d*$/.test(value)) return;
+    useEffect(() => {
+        setMounted(true);
+        setBlobsData(
+            Array.from({ length: 5 }).map(() => ({
+                size: Math.random() * 250 + 150,
+                left: Math.random() * 80 + 10,
+                top: Math.random() * 80 + 10,
+                animationDelay: Math.random() * -20,
+                animationDuration: Math.random() * 15 + 15,
+            }))
+        );
+    }, []);
 
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
+    // Keep track of the blob DOM elements for high-performance updates
+    const blobRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-    // Auto-focus next input
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
 
-    // Auto-submit when all filled
-    if (newOtp.every((d) => d !== '') && newOtp.join('').length === 6) {
-      setVerifying(true);
-      setTimeout(() => {
-        setVerifying(false);
-        setVerified(true);
-      }, 1500);
-    }
-  };
-
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  };
-
-  // Auto-focus first OTP input
-  useEffect(() => {
-    if (otpSent) {
-      setTimeout(() => otpRefs.current[0]?.focus(), 300);
-    }
-  }, [otpSent]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-      <ParticleBackground particleCount={30} />
-
-      {/* Ambient orbs */}
-      <div className="orb orb-violet w-[400px] h-[400px] -top-20 -left-40" />
-      <div className="orb orb-gold w-[300px] h-[300px] -bottom-20 -right-20" />
-
-      <div className="relative z-10 w-full max-w-md">
-        {/* Success State */}
-        {verified ? (
-          <div className="animate-scale-in text-center">
-            <GlassCard hover={false} glow="violet" className="p-10">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                <CheckCircle size={40} className="text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Welcome!</h2>
-              <p className="text-slate-400 mb-6">
-                You're now logged in. Your Digi-Vault is ready.
-              </p>
-              <a href="/vault" className="btn-gold inline-flex items-center gap-2">
-                Go to Digi-Vault
-                <ArrowRight size={16} />
-              </a>
-            </GlassCard>
-          </div>
-        ) : (
-          <div className="animate-fade-in-up">
-            {/* Logo */}
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-500 to-amber-400 flex items-center justify-center text-white text-xl font-bold shadow-xl shadow-violet-500/20">
-                SS
-              </div>
-              <h1 className="text-2xl font-bold text-white mb-1">
-                {otpSent ? 'Enter OTP' : 'Welcome Back'}
-              </h1>
-              <p className="text-sm text-slate-400">
-                {otpSent
-                  ? `We sent a 6-digit code to +91 ${phoneNumber}`
-                  : 'Login with your phone number'
+            // Apply subtle parallax effect to each blob
+            blobRefs.current.forEach((blob, index) => {
+                if (blob) {
+                    const speed = (index + 1) * 20;
+                    // Using margins for parallax so we don't overwrite the CSS transform animation
+                    blob.style.marginLeft = `${x * speed}px`;
+                    blob.style.marginTop = `${y * speed}px`;
                 }
-              </p>
+            });
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        return () => document.removeEventListener('mousemove', handleMouseMove);
+    }, []);
+
+    const [phone, setPhone] = useState('');
+    const [otp, setOtp] = useState('');
+    const [error, setError] = useState('');
+
+    // --- Form Logic ---
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        if (phone !== '9876543210' || otp !== '1234') {
+            setError('Invalid credentials. For demo, use 9876543210 and 1234.');
+            return;
+        }
+
+        setLoading(true);
+        setTimeout(() => {
+            // Set the authentication cookie to the current server's boot ID
+            const bootId = process.env.NEXT_PUBLIC_BOOT_ID || 'true';
+            document.cookie = `auth-token=${bootId}; path=/; max-age=86400`; // Expires in 1 day or on server restart
+            router.push('/');
+        }, 1500);
+    };
+
+    return (
+        <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#f4f4f1] overflow-hidden">
+            
+            {/* Liquid Physics Styles & Filters */}
+            <style>{`
+                .stage {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 0;
+                    filter: url('#gooey');
+                    opacity: 0.25; /* Subtle background presence */
+                    pointer-events: none;
+                }
+
+                .blob {
+                    position: absolute;
+                    background: linear-gradient(135deg, #013e4e, #2bd2ef); /* SamriddhiSetu Teal & Cyan */
+                    border-radius: 50%;
+                    filter: blur(20px);
+                    animation: float 20s infinite alternate ease-in-out;
+                    transition: margin 0.1s ease-out;
+                }
+
+                @keyframes float {
+                    0% { transform: translate(0, 0) scale(1); }
+                    33% { transform: translate(10vw, 20vh) scale(1.2); }
+                    66% { transform: translate(-5vw, 10vh) scale(0.8); }
+                    100% { transform: translate(5vw, -10vh) scale(1.1); }
+                }
+            `}</style>
+
+            <svg className="absolute w-0 h-0">
+                <defs>
+                    <filter id="gooey">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+                        <feColorMatrix 
+                            in="blur" 
+                            mode="matrix" 
+                            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" 
+                            result="goo" 
+                        />
+                        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+                    </filter>
+                </defs>
+            </svg>
+
+            {/* Liquid Physics Blobs */}
+            <div className="stage" id="stage">
+                {mounted && blobsData.map((data, index) => (
+                    <div
+                        key={index}
+                        ref={(el) => {
+                            if (el) blobRefs.current[index] = el;
+                        }}
+                        className="blob"
+                        style={{
+                            width: `${data.size}px`,
+                            height: `${data.size}px`,
+                            left: `${data.left}%`,
+                            top: `${data.top}%`,
+                            animationDelay: `${data.animationDelay}s`,
+                            animationDuration: `${data.animationDuration}s`,
+                        }}
+                    />
+                ))}
             </div>
 
-            <GlassCard hover={false} className="p-8 animate-border-glow">
-              {!otpSent ? (
-                /* ── Phone Input ── */
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-2">Phone Number</label>
-                    <div className="flex gap-2">
-                      <div className="input-glass !w-20 text-center text-slate-400 flex items-center justify-center">
-                        +91
-                      </div>
-                      <input
-                        type="tel"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                        placeholder="98765 43210"
-                        className="input-glass flex-1"
-                        maxLength={10}
-                        autoFocus
-                      />
+            {/* Clean Form Card */}
+            <div className="relative z-10 w-full max-w-[500px] bg-[#f8faf9]/80 backdrop-blur-xl rounded-[24px] p-8 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60">
+                <h1 className="text-[32px] tracking-tight text-[#1a1a1a] mb-8 font-normal">
+                    Secure Login
+                </h1>
+
+                <form onSubmit={handleLogin} className="space-y-6">
+                    <div>
+                        <label className="block text-[14px] text-[#333] mb-2 font-medium">
+                            Phone number*
+                        </label>
+                        <input 
+                            type="tel" 
+                            placeholder="9876543210"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full h-12 px-4 rounded-[12px] border border-[#e2e8e4] bg-white text-[15px] text-[#1a1a1a] outline-none transition-all focus:border-[#013e4e] focus:outline-none focus:ring-0 bg-opacity-90"
+                        />
                     </div>
-                  </div>
 
-                  <button
-                    onClick={handleSendOtp}
-                    disabled={phoneNumber.length < 10}
-                    className="w-full btn-primary flex items-center justify-center gap-2 !py-3.5 text-base disabled:opacity-30 disabled:pointer-events-none"
-                  >
-                    <Phone size={18} />
-                    Send OTP
-                  </button>
-
-                  <div className="flex items-center gap-2 text-xs text-slate-500 justify-center">
-                    <Shield size={12} />
-                    Secured with end-to-end encryption
-                  </div>
-                </div>
-              ) : (
-                /* ── OTP Input ── */
-                <div className="space-y-6">
-                  <div className="flex justify-center gap-3">
-                    {otp.map((digit, i) => (
-                      <input
-                        key={i}
-                        ref={(el) => { otpRefs.current[i] = el; }}
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={1}
-                        value={digit}
-                        onChange={(e) => handleOtpChange(i, e.target.value)}
-                        onKeyDown={(e) => handleKeyDown(i, e)}
-                        className={`w-12 h-14 text-center text-xl font-bold rounded-xl transition-all duration-300 outline-none ${
-                          digit
-                            ? 'input-glass !border-violet-500 !bg-violet-500/10 text-white'
-                            : 'input-glass'
-                        } ${verifying ? 'animate-pulse' : ''}`}
-                      />
-                    ))}
-                  </div>
-
-                  {verifying && (
-                    <div className="text-center">
-                      <div className="w-8 h-8 mx-auto border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
-                      <p className="text-xs text-violet-300 mt-2">Verifying...</p>
+                    <div>
+                        <label className="block text-[14px] text-[#333] mb-2 font-medium">
+                            OTP Verification*
+                        </label>
+                        <input 
+                            type="password"
+                            placeholder="1234"
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value)}
+                            className="w-full h-12 px-4 rounded-[12px] border border-[#e2e8e4] bg-white text-[15px] text-[#1a1a1a] outline-none transition-all focus:border-[#013e4e] focus:outline-none focus:ring-0 bg-opacity-90"
+                        />
                     </div>
-                  )}
 
-                  <div className="text-center">
-                    <button
-                      onClick={() => { setOtpSent(false); setOtp(['', '', '', '', '', '']); }}
-                      className="text-xs text-slate-400 hover:text-violet-300 transition-colors"
+                    {error && (
+                        <p className="text-[13px] font-medium text-red-500 pt-1">
+                            {error}
+                        </p>
+                    )}
+
+                    <p className="text-[13px] leading-relaxed text-[#5a5a5a] pt-2">
+                        By logging in, you agree to the processing of your personal data by SamriddhiSetu as described in the <a href="#" className="text-[#3b82f6] hover:underline">Privacy Statement</a>. You may safely log out at any time.
+                    </p>
+
+                    <button 
+                        type="submit" 
+                        disabled={loading}
+                        className="btn-primary inline-flex items-center gap-2 !px-6 !py-3 !rounded-[12px] !font-medium !text-[15px] mt-2 disabled:opacity-70"
                     >
-                      ← Change phone number
+                        {loading ? 'Verifying...' : 'Login now'}
+                        {!loading && <ArrowRight size={18} />}
                     </button>
-                  </div>
-
-                  <div className="text-center">
-                    <button className="text-xs text-amber-400 hover:text-amber-300 transition-colors">
-                      Didn&apos;t receive OTP? Resend in 30s
-                    </button>
-                  </div>
-                </div>
-              )}
-            </GlassCard>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+                </form>
+            </div>
+        </div>
+    );
 }

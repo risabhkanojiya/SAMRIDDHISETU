@@ -224,8 +224,8 @@ export function AnimatedPuzzlePatterns() {
                 >
                   <path
                     d={PATHS[pathIdx]}
-                    stroke="rgba(120, 210, 200, 0.22)"
-                    strokeWidth="0.8"
+                    stroke="rgba(120, 210, 200, 0.45)"
+                    strokeWidth="1.2"
                     strokeLinecap="round"
                   />
                 </svg>

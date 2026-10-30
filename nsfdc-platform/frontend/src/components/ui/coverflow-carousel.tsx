@@ -10,6 +10,7 @@ const useIsoLayoutEffect =
 
 export interface CoverflowSlide {
   src: string;
+  video?: string;
   alt: string;
   title?: string;
   subtitle?: string;
@@ -38,6 +39,8 @@ export interface CoverflowCarouselProps {
   showNavigation?: boolean;
   /** Names the carousel for assistive tech. */
   label?: string;
+  /** Framer Motion value to bind the scroll position to the carousel slides */
+  scrollProgress?: import("framer-motion").MotionValue<number>;
   className?: string;
   cardClassName?: string;
 }
@@ -56,6 +59,7 @@ export function CoverflowCarousel({
   showPagination = false,
   showNavigation = false,
   label = "Cover carousel",
+  scrollProgress,
   className,
   cardClassName,
 }: CoverflowCarouselProps) {
@@ -171,6 +175,15 @@ export function CoverflowCarousel({
     [clamp, settle],
   );
 
+  React.useEffect(() => {
+    if (!scrollProgress) return;
+    return scrollProgress.on("change", (latest) => {
+      // Map scroll progress 0-0.95 smoothly to steps 0-3, leaving a tiny 5% buffer at end
+      const progress = Math.min(1, latest / 0.95);
+      settle(progress * (count - 1));
+    });
+  }, [scrollProgress, count, settle]);
+
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
@@ -279,7 +292,7 @@ export function CoverflowCarousel({
           <div
             className="relative select-none"
             style={{
-              height: "var(--cf-card)",
+              height: "calc(var(--cf-card) * 10 / 16)",
               transformStyle: "preserve-3d",
             }}
           >
@@ -293,18 +306,29 @@ export function CoverflowCarousel({
                 aria-roledescription="slide"
                 aria-label={`${index + 1} of ${count}`}
                 className={cn(
-                  "absolute left-1/2 top-0 aspect-square overflow-hidden rounded-2xl bg-muted shadow-xl will-change-transform",
+                  "absolute left-1/2 top-0 aspect-[16/10] overflow-hidden rounded-2xl bg-white shadow-xl will-change-transform",
                   cardClassName,
                 )}
                 style={{ width: "var(--cf-card)" }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={slide.src}
-                  alt={slide.alt}
-                  draggable={false}
-                  className="h-full w-full select-none object-cover"
-                />
+                {slide.video ? (
+                  <video
+                    src={slide.video}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="h-full w-full select-none object-cover"
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={slide.src}
+                    alt={slide.alt}
+                    draggable={false}
+                    className="h-full w-full select-none object-cover"
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -332,28 +356,23 @@ export function CoverflowCarousel({
         )}
       </div>
 
-      {showCaption && active?.title && (
+      {showCaption && active && (
         <div
           key={selected}
-          className="mt-2 flex flex-col items-center px-6 duration-300 animate-in fade-in"
+          className="mt-4 flex flex-col items-center px-6 duration-300 animate-in fade-in text-center"
         >
-          <p className="text-[15px] font-semibold tracking-tight text-foreground">
+          {active.meta?.find((m) => m.label === 'Step')?.value && (
+            <p className="text-[10px] font-bold tracking-widest text-[#272727] uppercase mb-1.5">
+              STEP {parseInt(active.meta.find((m) => m.label === 'Step')!.value, 10)}
+            </p>
+          )}
+          <p className="text-[15px] font-semibold tracking-tight text-[#272727]">
             {active.title}
           </p>
           {active.subtitle && (
-            <p className="mt-1 text-[13px] text-muted-foreground">
+            <p className="mt-1 text-[13px] text-[#5a5a5a] max-w-sm">
               {active.subtitle}
             </p>
-          )}
-          {active.meta && active.meta.length > 0 && (
-            <dl className="mt-10 w-full max-w-[230px] text-[12px]">
-              {active.meta.map((row) => (
-                <div key={row.label} className="flex justify-between py-[5px]">
-                  <dt className="text-muted-foreground">{row.label}</dt>
-                  <dd className="font-medium text-foreground">{row.value}</dd>
-                </div>
-              ))}
-            </dl>
           )}
         </div>
       )}

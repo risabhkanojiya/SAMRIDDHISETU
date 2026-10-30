@@ -19,13 +19,23 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { locale, setLocale, t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
+    
+    // Check if user is logged in
+    setIsLoggedIn(document.cookie.includes('auth-token='));
+    
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [pathname]);
+
+  const handleLogout = () => {
+    document.cookie = "auth-token=; path=/; max-age=0";
+    window.location.href = '/login';
+  };
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -89,13 +99,23 @@ export default function Navbar() {
               {locale === 'en' ? 'हिन्दी' : 'EN'}
             </button>
 
-            {/* Login */}
-            <Link
-              href="/login"
-              className="hidden sm:flex items-center justify-center bg-[#013e4e] text-white rounded-full text-[13px] font-medium hover:bg-[#012d39] transition-colors shadow-sm !py-1.5 !px-4"
-            >
-              {t('nav.login')}
-            </Link>
+            {/* Login / Logout */}
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="btn-ghost hidden sm:flex items-center justify-center shadow-sm !py-1.5 !px-4 !text-[13px] gap-2 border border-[#e5e7eb]"
+              >
+                <div className="w-4 h-4 rounded-full bg-[#013e4e] flex items-center justify-center text-white text-[9px] font-bold">U</div>
+                Logout
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="btn-primary hidden sm:flex items-center justify-center shadow-sm !py-1.5 !px-4 !text-[13px]"
+              >
+                {t('nav.login')}
+              </Link>
+            )}
 
             {/* Mobile Hamburger */}
             <button
@@ -133,12 +153,22 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <Link
-            href="/login"
-            className="flex items-center justify-center gap-2 mt-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-[#013e4e] text-white hover:bg-[#012d39] transition-all"
-          >
-            Talk to an expert
-          </Link>
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="btn-ghost flex items-center justify-center gap-2 mt-2 !px-4 !py-2.5 w-full border border-[#e5e7eb]"
+            >
+              <div className="w-4 h-4 rounded-full bg-[#013e4e] flex items-center justify-center text-white text-[9px] font-bold">U</div>
+              Logout
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="btn-primary flex items-center justify-center gap-2 mt-2 !px-4 !py-2.5"
+            >
+              {t('nav.login')}
+            </Link>
+          )}
         </div>
       </div>
     </nav>

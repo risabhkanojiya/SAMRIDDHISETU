@@ -207,7 +207,7 @@ def verify_document_ocr(
 
     def _call():
         return client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=[
                 "Inspect and extract details from this government certificate image.",
                 image_part

@@ -12,66 +12,64 @@ import GeometricBackground from '@/components/ui/geometric-background';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 
-
-const features = [
-  {
-    icon: Sparkles,
-    title: 'AI Scheme Recommender',
-    desc: 'Answer 4 simple questions. Our AI matches you to the perfect NSFDC credit scheme instantly.',
-    href: '/recommend',
-    color: 'from-[#013e4e] to-[#1a6b80]',
-    glow: 'violet' as const,
-  },
-  {
-    icon: Calculator,
-    title: 'EMI Calculator',
-    desc: 'Visualize monthly payments with dynamic sliders. Accounts for moratorium periods and scheme rates.',
-    href: '/results',
-    color: 'from-amber-400 to-orange-500',
-    glow: 'gold' as const,
-  },
-  {
-    icon: MapPin,
-    title: 'Partner Locator',
-    desc: 'Find the nearest SCA, RRB, or NBFC-MFI on an interactive map. Filters out high-NPA partners.',
-    href: '/locator',
-    color: 'from-blue-500 to-cyan-500',
-    glow: 'none' as const,
-  },
-  {
-    icon: Shield,
-    title: 'Smart Digi-Vault',
-    desc: 'Upload KYC documents once. Auto-attached to your application when you apply for a scheme.',
-    href: '/vault',
-    color: 'from-emerald-500 to-teal-600',
-    glow: 'none' as const,
-  },
-];
-
-const steps = [
-  { num: '01', title: 'Choose Language', desc: 'Select Hindi, English, or use voice input' },
-  { num: '02', title: 'Answer 4 Questions', desc: 'Income, project type, cost & education' },
-  { num: '03', title: 'Get Matched', desc: 'AI recommends the best scheme for you' },
-  { num: '04', title: 'Apply Digitally', desc: 'Auto-route to nearest eligible partner' },
-];
-
-const stats = [
-  { value: 100, suffix: '+', label: 'Channel Partners' },
-  { value: 6, suffix: '', label: 'Credit Schemes' },
-  { value: 50, prefix: '₹', suffix: 'L', label: 'Max Loan Amount' },
-  { value: 6.5, suffix: '%', label: 'Starting Interest' },
-];
+import { useTranslation } from '@/lib/I18nProvider';
 
 export default function Home() {
+  const { t } = useTranslation();
+
+  const features = [
+    {
+      icon: Sparkles,
+      title: t('home.features.ai.title'),
+      desc: t('home.features.ai.desc'),
+      href: '/recommend',
+      color: 'from-[#013e4e] to-[#1a6b80]',
+      glow: 'violet' as const,
+    },
+    {
+      icon: Calculator,
+      title: t('home.features.emi.title'),
+      desc: t('home.features.emi.desc'),
+      href: '/results',
+      color: 'from-amber-400 to-orange-500',
+      glow: 'gold' as const,
+    },
+    {
+      icon: MapPin,
+      title: t('home.features.map.title'),
+      desc: t('home.features.map.desc'),
+      href: '/locator',
+      color: 'from-blue-500 to-cyan-500',
+      glow: 'none' as const,
+    },
+    {
+      icon: Shield,
+      title: t('home.features.vault.title'),
+      desc: t('home.features.vault.desc'),
+      href: '/vault',
+      color: 'from-emerald-500 to-teal-600',
+      glow: 'none' as const,
+    },
+  ];
+
+  const steps = [
+    { num: '01', title: t('home.steps.s1'), desc: t('home.steps.s1desc') },
+    { num: '02', title: t('home.steps.s2'), desc: t('home.steps.s2desc') },
+    { num: '03', title: t('home.steps.s3'), desc: t('home.steps.s3desc') },
+    { num: '04', title: t('home.steps.s4'), desc: t('home.steps.s4desc') },
+  ];
+
+  const stats = [
+    { value: 100, suffix: '+', label: t('home.stats.p1') },
+    { value: 6, suffix: '', label: t('home.stats.p2') },
+    { value: 50, prefix: '₹', suffix: 'L', label: t('home.stats.p3') },
+    { value: 6.5, suffix: '%', label: t('home.stats.p4') },
+  ];
   const thirdSectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: thirdSectionRef,
     offset: ["start start", "end end"]
   });
-
-  const sectionScale = useTransform(scrollYProgress, [0, 0.7], [0.5, 1]);
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.15], [0, 1]);
-  const sectionY = useTransform(scrollYProgress, [0, 0.7], [50, 0]);
 
   return (
     <div className="relative">
@@ -111,28 +109,28 @@ export default function Home() {
             {/* Badge */}
             <div className="animate-fade-in-down inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-[#e5e7eb] text-xs font-semibold text-[#4b5563] mb-8 shadow-sm">
               <Sparkles size={14} className="text-[#013e4e]" />
-              NSFDC Digital Platform — Powered by AI
+              {t('home.badge')}
             </div>
 
             {/* Main Heading */}
             <h1 className="text-[4rem] sm:text-[5rem] lg:text-[6rem] font-medium leading-[1.05] tracking-tight text-[#272727] mb-6">
-              Samriddhi<span className="text-[#013e4e]">Setu</span>
+              {t('home.title')}<span className="text-[#013e4e]">{t('home.titleHighlight')}</span>
             </h1>
 
             <p className="text-xl lg:text-2xl text-[#272727] mb-4 max-w-lg leading-relaxed font-semibold">
-              Intelligent financial assistance for{' '}
-              <span className="text-[#013e4e]">Scheduled Caste</span> beneficiaries.
+              {t('home.subtitle')}
+              <span className="text-[#013e4e]">{t('home.subtitleHighlight')}</span>{t('home.subtitleEnd')}
             </p>
 
             <p className="text-base lg:text-lg text-[#5a5a5a] mb-10 max-w-md leading-relaxed font-normal">
-              Do more with less using the only platform that delivers AI-powered scheme discovery, EMI projections, and geo-spatial routing at every step.
+              {t('home.desc')}
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-4 mb-16">
-              <MotionButton href="/recommend" label="Find Your Scheme" classes="w-full sm:w-auto" />
-              <Link href="/locator" className="bg-white text-[#013e4e] px-7 py-3.5 rounded-[30px] font-medium text-base border border-[#e5e7eb] transition-all duration-500 ease-out hover:bg-[#013e4e] hover:text-white hover:border-[#013e4e] flex justify-center items-center gap-2 shadow-sm hover:shadow-md w-full sm:w-auto">
-                <MapPin size={16} /> Locate Partner
+              <MotionButton href="/recommend" label={t('home.cta.recommender')} classes="w-full sm:w-auto" />
+              <Link href="/locator" className="btn-primary flex justify-center items-center gap-2 w-full sm:w-auto">
+                <MapPin size={16} /> {t('home.cta.locator')}
               </Link>
             </div>
 
@@ -160,52 +158,48 @@ export default function Home() {
 
       {/* ═══ HUMMINGBIRD-STYLE COMBINED SCROLL SEQUENCE ═══ */}
       <CombinedScrollSequence
-        line1="Everything you need,"
-        line2="one platform."
-        subtitle="From scheme discovery to application submission — seamlessly connected modules designed for rural and semi-urban users."
+        line1={t('home.scroll.l1')}
+        line2={t('home.scroll.l2')}
+        subtitle={t('home.scroll.subtitle')}
         features={features}
       />
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section ref={thirdSectionRef} className="relative h-[140vh] bg-white">
-        <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden w-full pt-24 pb-12">
-          {/* Dynamic Background Elements */}
+      <section ref={thirdSectionRef} className="relative h-[300vh] bg-white">
+        <div className="sticky top-0 h-screen flex flex-col justify-start overflow-hidden w-full pt-[10vh]">
           <GeometricBackground>
-            <motion.div 
-              className="max-w-5xl mx-auto relative z-10 w-full"
-              style={{ scale: sectionScale, opacity: sectionOpacity, y: sectionY }}
-            >
-          <div className="text-center mb-6">
-            <p className="text-sm font-semibold text-[#013e4e] uppercase tracking-widest mb-2">How it works</p>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-[#272727]">
-              Apply in{' '}
-              <span className="text-[#013e4e]">4 simple steps</span>
-            </h2>
-            <p className="text-[#5a5a5a] max-w-xl mx-auto leading-relaxed">
-              No paperwork. No bank visits. Complete your entire application digitally in under 5 minutes.
-            </p>
-          </div>
+            <div className="max-w-5xl mx-auto relative z-10 w-full">
+              <div className="text-center mb-6">
+                <p className="text-sm font-semibold text-[#013e4e] uppercase tracking-widest mb-2">{t('home.steps.title')}</p>
+                <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-[#272727]">
+                  {t('home.steps.title')} <span className="text-[#013e4e]">{t('home.steps.highlight')}</span>
+                </h2>
+                <p className="text-[#5a5a5a] max-w-xl mx-auto leading-relaxed">
+                  {t('home.steps.desc')}
+                </p>
+              </div>
 
-          <div className="mt-8 mb-4">
-            <CoverflowCarousel 
-              cardWidth="clamp(200px, 30vw, 360px)"
-              slides={steps.map((step) => ({
-                src: `https://placehold.co/600x600/f4f4f1/013e4e?text=Step+${step.num}`,
-                alt: step.title,
-                title: step.title,
-                subtitle: step.desc,
-                meta: [{ label: 'Step', value: step.num }]
-              }))}
-              showCaption={true}
-              showNavigation={true}
-              showPagination={true}
-            />
-          </div>
-            </motion.div>
+              <div className="mt-8 mb-4">
+                <CoverflowCarousel
+                  cardWidth="clamp(320px, 70vmin, 800px)"
+                  scrollProgress={scrollYProgress}
+                  slides={steps.map((step) => ({
+                    src: `https://placehold.co/600x600/f4f4f1/013e4e?text=Step+${step.num}`,
+                    video: `/steps/SS_STEP${parseInt(step.num, 10)}.webm`,
+                    alt: step.title,
+                    title: step.title,
+                    subtitle: step.desc,
+                    meta: [{ label: 'Step', value: step.num }]
+                  }))}
+                  showCaption={true}
+                  showNavigation={true}
+                  showPagination={true}
+                />
+              </div>
+            </div>
           </GeometricBackground>
         </div>
       </section>
-
       {/* ═══ CTA FOOTER ═══ */}
       <section className="relative py-24 px-4 bg-[#f4f4f1]">
         <div className="max-w-3xl mx-auto text-center">
@@ -216,19 +210,19 @@ export default function Home() {
 
             <div className="relative z-10">
               <h2 className="text-3xl font-bold mb-4 text-[#272727]">
-                Ready to find your <span className="gradient-text-gold">scheme</span>?
+                {t('home.cta2.title')} <span className="gradient-text-gold">{t('home.cta2.highlight')}</span>?
               </h2>
               <p className="text-[#5a5a5a] mb-8 max-w-lg mx-auto">
-                Join thousands of SC beneficiaries who have discovered their eligible NSFDC credit schemes digitally.
+                {t('home.cta2.desc')}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/recommend" className="btn-gold flex items-center gap-2 !px-8 !py-3">
                   <Search size={18} />
-                  Start Scheme Finder
+                  {t('home.cta2.start')}
                 </Link>
                 <Link href="/vault" className="btn-ghost flex items-center gap-2 !px-8 !py-3">
                   <FileCheck size={18} />
-                  Upload Documents
+                  {t('home.cta2.upload')}
                 </Link>
               </div>
             </div>

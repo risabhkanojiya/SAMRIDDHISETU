@@ -6,6 +6,8 @@ import { useState, useEffect, useRef } from 'react';
 import GlassCard from '@/components/GlassCard';
 import { Calculator, TrendingUp, Clock, IndianRupee } from 'lucide-react';
 import { useTranslation } from '@/lib/I18nProvider';
+import { calculateEmi } from '@/lib/api';
+import { useAppStore } from '@/store/useAppStore';
 
 interface EmiResult {
   emi: number;
@@ -77,15 +79,28 @@ function drawDonut(
 
 export default function ResultsPage() {
   const { t } = useTranslation();
-  const [loanAmount, setLoanAmount] = useState(200000);
-  const [interestRate, setInterestRate] = useState(6.5);
+  const emiDetails = useAppStore((s) => s.emiDetails);
+
+  const [loanAmount, setLoanAmount] = useState(emiDetails?.amount || 200000);
+  const [interestRate, setInterestRate] = useState(emiDetails?.rate || 6.5);
   const [tenureMonths, setTenureMonths] = useState(60);
-  const [moratoriumMonths, setMoratoriumMonths] = useState(6);
+  const [moratoriumMonths, setMoratoriumMonths] = useState(emiDetails?.moratorium ?? 6);
   const [result, setResult] = useState<EmiResult | null>(null);
   const [animProgress, setAnimProgress] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const calculate = () => {
+  // Fallback to read from URL if Zustand state is lost (e.g. fast refresh or hard load)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('amount')) setLoanAmount(Number(params.get('amount')));
+      if (params.has('rate')) setInterestRate(Number(params.get('rate')));
+      if (params.has('moratorium')) setMoratoriumMonths(Number(params.get('moratorium')));
+    }
+  }, []);
+
+  const calculate = async () => {
+    // Local calculation for instant UI feedback
     const n = tenureMonths - moratoriumMonths;
     const r = interestRate / (12 * 100);
     let emi: number;
@@ -101,6 +116,26 @@ export default function ResultsPage() {
       effectiveMonths: n,
     });
     setAnimProgress(0);
+
+    // Try backend for validated result
+    try {
+      const response = await calculateEmi({
+        loan_amount: loanAmount,
+        interest_rate: interestRate,
+        tenure_months: tenureMonths,
+        moratorium_months: moratoriumMonths,
+      });
+      const data = response.data;
+      setResult({
+        emi: data.emi,
+        totalPayment: data.total_payment,
+        totalInterest: data.total_interest,
+        effectiveMonths: data.effective_tenure_months,
+      });
+    } catch (err) {
+      // Backend unavailable — local calculation already applied
+      console.warn('EMI backend unavailable, using local calculation:', err);
+    }
   };
 
   // Auto-calculate on mount and slider changes
@@ -164,7 +199,17 @@ export default function ResultsPage() {
                     <IndianRupee size={14} className="text-[#013e4e]" />
                     {t('calc.loanAmt')}
                   </label>
-                  <span className="text-xl font-bold text-[#013e4e]">{formatINR(loanAmount)}</span>
+                  <div className="flex items-center justify-end">
+                    <span className="text-xl font-bold text-[#013e4e]">₹</span>
+                    <input 
+                      type="number" 
+                      value={loanAmount} 
+                      onChange={(e) => setLoanAmount(Number(e.target.value))} 
+                      className="text-xl font-bold text-[#013e4e] bg-transparent outline-none border-b border-transparent focus:border-[#013e4e] transition-colors text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      style={{ width: `${String(loanAmount).length + 0.5}ch` }}
+                      min={10000} max={5000000}
+                    />
+                  </div>
                 </div>
                 <input
                   type="range"
@@ -184,7 +229,17 @@ export default function ResultsPage() {
                     <TrendingUp size={14} className="text-[#013e4e]" />
                     {t('calc.rate')}
                   </label>
-                  <span className="text-xl font-bold text-[#013e4e]">{interestRate}%</span>
+                  <div className="flex items-center justify-end">
+                    <input 
+                      type="number" 
+                      value={interestRate} 
+                      onChange={(e) => setInterestRate(Number(e.target.value))} 
+                      className="text-xl font-bold text-[#013e4e] bg-transparent outline-none border-b border-transparent focus:border-[#013e4e] transition-colors text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      style={{ width: `${String(interestRate).length + 0.5}ch` }}
+                      min={4} max={15} step={0.5}
+                    />
+                    <span className="text-xl font-bold text-[#013e4e]">%</span>
+                  </div>
                 </div>
                 <input
                   type="range"
@@ -204,7 +259,17 @@ export default function ResultsPage() {
                     <Clock size={14} className="text-blue-400" />
                     {t('calc.tenure')}
                   </label>
-                  <span className="text-xl font-bold text-blue-300">{tenureMonths} {t('common.months')}</span>
+                  <div className="flex items-center justify-end">
+                    <input 
+                      type="number" 
+                      value={tenureMonths} 
+                      onChange={(e) => setTenureMonths(Number(e.target.value))} 
+                      className="text-xl font-bold text-blue-300 bg-transparent outline-none border-b border-transparent focus:border-blue-300 transition-colors text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      style={{ width: `${String(tenureMonths).length + 1}ch` }}
+                      min={12} max={120} step={6}
+                    />
+                    <span className="text-xl font-bold text-blue-300 ml-1">{t('common.months')}</span>
+                  </div>
                 </div>
                 <input
                   type="range"
@@ -224,7 +289,17 @@ export default function ResultsPage() {
                     <Clock size={14} className="text-[#013e4e]" />
                     {t('calc.moratorium')}
                   </label>
-                  <span className="text-xl font-bold text-emerald-300">{moratoriumMonths} {t('common.months')}</span>
+                  <div className="flex items-center justify-end">
+                    <input 
+                      type="number" 
+                      value={moratoriumMonths} 
+                      onChange={(e) => setMoratoriumMonths(Number(e.target.value))} 
+                      className="text-xl font-bold text-emerald-300 bg-transparent outline-none border-b border-transparent focus:border-emerald-300 transition-colors text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      style={{ width: `${String(moratoriumMonths).length + 1}ch` }}
+                      min={0} max={12} step={1}
+                    />
+                    <span className="text-xl font-bold text-emerald-300 ml-1">{t('common.months')}</span>
+                  </div>
                 </div>
                 <input
                   type="range"

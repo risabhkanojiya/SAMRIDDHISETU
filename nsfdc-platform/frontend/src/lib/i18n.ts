@@ -14,7 +14,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'nav.calculator': 'EMI Calculator',
     'nav.locator': 'Partner Map',
     'nav.vault': 'Digi-Vault',
-    'nav.login': 'Talk to an expert',
+    'nav.login': 'Login',
     'nav.logo': 'SamriddhiSetu',
 
     // Landing Page

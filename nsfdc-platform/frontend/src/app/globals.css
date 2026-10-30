@@ -75,7 +75,7 @@ body::before {
 /* Beautiful soft multi-color gradient background */
 .bg-hummingbird-gradient {
   background-color: #f4f4f1;
-  background-image: 
+  background-image:
     radial-gradient(circle at top left, rgba(215, 245, 230, 0.9) 0%, transparent 55%),
     radial-gradient(circle at bottom right, rgba(220, 238, 255, 0.9) 0%, transparent 55%);
 }
@@ -138,30 +138,34 @@ body::before {
 
 /* ── Buttons ── */
 .btn-primary {
-  background: #013e4e;
   color: #f6f6f6;
   padding: 12px 2rem;
   border-radius: 30px;
   font-weight: 500;
   font-size: 15px;
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  /* Shiny Effect Base - perfectly preserves static color */
+  background: linear-gradient(110deg, #013e4e 0%, #013e4e 40%, #2bd2ef 50%, #013e4e 60%, #013e4e 100%);
+  background-size: 300% auto;
+  background-position: 0% center;
+  transition: background-position 700ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms, box-shadow 200ms;
 }
 
 .btn-primary::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
   opacity: 0;
   transition: opacity 150ms;
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
+  /* Clean Drop Shadow */
   box-shadow: 0 4px 12px rgba(1, 62, 78, 0.25);
-  background: #012d39;
+  background-position: 100% center;
 }
 
 .btn-primary:hover::before {
@@ -211,7 +215,7 @@ body::before {
   transition: all 200ms;
   width: 100%;
   outline: none;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .input-glass::placeholder {
@@ -265,69 +269,155 @@ input[type="range"]::-moz-range-thumb {
 
 /* ── Animations ── */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-40px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(40px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(1, 62, 78, 0.15); }
-  50% { box-shadow: 0 0 40px rgba(1, 62, 78, 0.25); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(1, 62, 78, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(1, 62, 78, 0.25);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes border-glow {
-  0%, 100% { border-color: rgba(1, 62, 78, 0.1); }
-  50% { border-color: rgba(1, 62, 78, 0.3); }
+
+  0%,
+  100% {
+    border-color: rgba(1, 62, 78, 0.1);
+  }
+
+  50% {
+    border-color: rgba(1, 62, 78, 0.3);
+  }
 }
 
 @keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes wave {
-  0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(2); }
+
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(2);
+  }
 }
 
 /* Animation utility classes */
@@ -364,7 +454,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.06) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -379,14 +469,37 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Staggered animation delays */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
-.delay-600 { animation-delay: 600ms; }
-.delay-700 { animation-delay: 700ms; }
-.delay-800 { animation-delay: 800ms; }
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.delay-600 {
+  animation-delay: 600ms;
+}
+
+.delay-700 {
+  animation-delay: 700ms;
+}
+
+.delay-800 {
+  animation-delay: 800ms;
+}
 
 /* Start invisible for staggered animations */
 .stagger-item {
